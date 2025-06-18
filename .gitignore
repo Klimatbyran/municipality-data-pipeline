@@ -1,0 +1,10 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# python
+__pycache__/
+
+# Python caches
+cache_df_get_smhi_data_*
+
+# Open files
+.~lock.*

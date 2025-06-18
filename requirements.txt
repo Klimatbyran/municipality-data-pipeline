@@ -1,0 +1,9 @@
+numpy
+pandas
+xlrd
+openpyxl
+pyarrow
+scipy
+pytest
+pytest-profiling
+graphviz
