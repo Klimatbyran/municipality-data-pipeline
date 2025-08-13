@@ -14,9 +14,9 @@ class TestConsumtionEmissionsCalculations(unittest.TestCase):
             {
                 "Kommun": ["Ale", "Alingsås", "Alvesta"],
                 "consumptionEmissions": [
-                    5.906,
-                    6.066,
-                    6.064,
+                    5.585,
+                    5.528,
+                    5.157,
                 ],
             }
         )
