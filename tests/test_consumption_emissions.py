@@ -2,7 +2,7 @@
 import unittest
 import pandas as pd
 
-from issues.consumption.consumption_emissions import get_consumption_emissions
+from kpis.consumption.consumption_emissions import get_consumption_emissions
 
 
 class TestConsumtionEmissionsCalculations(unittest.TestCase):

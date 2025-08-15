@@ -2,8 +2,8 @@
 import unittest
 import pandas as pd
 
-from issues.emissions.historical_data_calculations import get_smhi_data
-from issues.emissions.historical_data_calculations import get_n_prep_data_from_smhi
+from kpis.emissions.historical_data_calculations import get_smhi_data
+from kpis.emissions.historical_data_calculations import get_n_prep_data_from_smhi
 
 LAST_YEAR_WITH_SMHI_DATA = 2023
 CURRENT_YEAR = 2025

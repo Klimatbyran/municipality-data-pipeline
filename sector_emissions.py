@@ -3,7 +3,7 @@ from typing import Dict, List
 import json
 import pandas as pd
 
-from issues.emissions.historical_data_calculations import (
+from kpis.emissions.historical_data_calculations import (
     get_smhi_data,
     extract_sector_data,
 )
