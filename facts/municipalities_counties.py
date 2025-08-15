@@ -3,7 +3,7 @@ import pandas as pd
 
 def get_municipalities():
     """Load and process municipality data with their corresponding county codes."""
-    municipalities_df = pd.read_excel("kpis/kommunlankod_2023.xls")
+    municipalities_df = pd.read_excel("facts/kommunlankod_2023.xls")
 
     # Set column names to 'Kod' and 'Namn'
     municipalities_df.columns = ["Kod", "Namn"]
