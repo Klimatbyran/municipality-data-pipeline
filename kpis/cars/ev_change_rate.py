@@ -3,7 +3,7 @@ import pandas as pd
 
 
 # calculations based on trafa data
-PATH_CARS_DATA = "solutions/cars/sources/kpi1_calculations.xlsx"
+PATH_CARS_DATA = "kpis/cars/sources/kpi1_calculations.xlsx"
 
 
 def get_ev_change_rate(df, to_percent: bool = True):

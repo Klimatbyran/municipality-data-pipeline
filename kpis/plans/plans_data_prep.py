@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
+
 from helpers import clean_kommun
 
 
-PATH_PLANS_DATA = "facts/plans/klimatplaner.xlsx"
+PATH_PLANS_DATA = "kpis/plans/klimatplaner.xlsx"
 
 
 def get_climate_plans(df):

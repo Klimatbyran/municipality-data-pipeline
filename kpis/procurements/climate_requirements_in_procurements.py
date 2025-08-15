@@ -6,9 +6,9 @@ from helpers import clean_kommun
 
 
 PATH_GREENPEACE_DATA = (
-    "facts/procurements/Klimatkrav offentlig upphandling kartläggning.xlsx"
+    "kpis/procurements/Klimatkrav offentlig upphandling kartläggning.xlsx"
 )
-PATH_NUR_DATA = "facts/procurements/NUE2022_DATA_2023-12-20.xlsx"
+PATH_NUR_DATA = "kpis/procurements/NUE2022_DATA_2023-12-20.xlsx"
 
 
 def get_greenpeace_data():
