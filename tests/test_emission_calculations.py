@@ -3,7 +3,7 @@ import datetime
 import unittest
 import pandas as pd
 
-from issues.emissions.emission_data_calculations import (
+from kpis.emissions.emission_data_calculations import (
     calculate_historical_change_percent,
     deduct_cement,
     calculate_n_subtract_national_overheads,
@@ -13,11 +13,11 @@ from issues.emissions.emission_data_calculations import (
     calculate_hit_net_zero,
     calculate_budget_runs_out,
 )
-from issues.emissions.trend_calculations import (
+from kpis.emissions.trend_calculations import (
     calculate_trend_coefficients,
     calculate_trend,
 )
-from issues.emissions.approximated_data_calculations import (
+from kpis.emissions.approximated_data_calculations import (
     calculate_approximated_historical,
 )
 

@@ -1,8 +1,8 @@
 import pandas as pd
 
 
-PATH_BICYCLE_DATA = "solutions/bicycles/sources/Cykelnät per komun 20241231.xlsx"
-PATH_POPULATION_DATA = "solutions/bicycles/sources/be0101_tabhel2024.xlsx"
+PATH_BICYCLE_DATA = "kpis/bicycles/sources/Cykelnät per komun 20241231.xlsx"
+PATH_POPULATION_DATA = "kpis/bicycles/sources/be0101_tabhel2024.xlsx"
 
 
 def calculate_bike_lane_per_capita():

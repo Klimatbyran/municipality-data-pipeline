@@ -7,16 +7,16 @@ from typing import Any, Dict, List
 import numpy as np
 import pandas as pd
 
-from solutions.cars.ev_change_rate import get_ev_change_rate
-from solutions.cars.electric_vehicle_per_charge_points import (
+from kpis.cars.ev_change_rate import get_ev_change_rate
+from kpis.cars.electric_vehicle_per_charge_points import (
     get_electric_vehicle_per_charge_points,
 )
-from solutions.bicycles.bicycle_data_calculations import calculate_bike_lane_per_capita
-from facts.plans.plans_data_prep import get_climate_plans
+from kpis.bicycles.bicycle_data_calculations import calculate_bike_lane_per_capita
+from kpis.plans.plans_data_prep import get_climate_plans
 from facts.municipalities_counties import get_municipalities
-from facts.procurements.climate_requirements_in_procurements import get_procurement_data
-from issues.emissions.emission_data_calculations import emission_calculations
-from issues.consumption.consumption_emissions import get_consumption_emissions
+from kpis.procurements.climate_requirements_in_procurements import get_procurement_data
+from kpis.emissions.emission_data_calculations import emission_calculations
+from kpis.consumption.consumption_emissions import get_consumption_emissions
 
 # Notebook from ClimateView that our calculations are based on:
 # https://colab.research.google.com/drive/1qqMbdBTu5ulAPUe-0CRBmFuh8aNOiHEb?usp=sharing

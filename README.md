@@ -71,7 +71,7 @@ In the list, the term appearing before the colon (:) is the standardized name th
 
 ### Emission Calculations 
 
-The folder `/issues/emissions` contains files with functions to perform calculations related to CO2 emissions for municipalities, based on SMHI emission data and a given total CO2 budget for Sweden. Each function serves a specific purpose such as preprocessing data, calculating municipality-specific budgets, future trends or when the budget for a municipality will run out. Their order of execution is specified in `/issues/emissions/emission_data_calculations.py`.
+The folder `/kpis/emissions` contains files with functions to perform calculations related to CO2 emissions for municipalities, based on SMHI emission data and a given total CO2 budget for Sweden. Each function serves a specific purpose such as preprocessing data, calculating municipality-specific budgets, future trends or when the budget for a municipality will run out. Their order of execution is specified in `/kpis/emissions/emission_data_calculations.py`.
 
 #### Constants 
 
@@ -87,7 +87,7 @@ The most important constants in the module are `NATIONAL_BUDGET_15`, `NATIONAL_B
 
 #### Functions
 
-Here's a summary of what the functions do, in order of execution in `/issues/emissions/emission_data_calculations.py`:
+Here's a summary of what the functions do, in order of execution in `/kpis/emissions/emission_data_calculations.py`:
 
 1. `get_n_prep_data_from_smhi`: Downloads data from SMHI and preprocess it into a pandas dataframe.
 

@@ -2,7 +2,7 @@
 import unittest
 import pandas as pd
 
-from solutions.bicycles.bicycle_data_calculations import calculate_bike_lane_per_capita
+from kpis.bicycles.bicycle_data_calculations import calculate_bike_lane_per_capita
 
 
 class TestBicycleCalculations(unittest.TestCase):

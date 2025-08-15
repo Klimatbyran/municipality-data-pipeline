@@ -5,11 +5,11 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import numpy as np
 
-from issues.emissions.historical_data_calculations import get_n_prep_data_from_smhi
-from issues.emissions.approximated_data_calculations import (
+from kpis.emissions.historical_data_calculations import get_n_prep_data_from_smhi
+from kpis.emissions.approximated_data_calculations import (
     calculate_approximated_historical,
 )
-from issues.emissions.trend_calculations import (
+from kpis.emissions.trend_calculations import (
     calculate_trend_coefficients,
     calculate_trend,
 )

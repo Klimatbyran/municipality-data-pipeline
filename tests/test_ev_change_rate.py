@@ -2,7 +2,7 @@
 import unittest
 import pandas as pd
 
-from solutions.cars.ev_change_rate import get_ev_change_rate
+from kpis.cars.ev_change_rate import get_ev_change_rate
 
 
 class TestBicycleCalculations(unittest.TestCase):
