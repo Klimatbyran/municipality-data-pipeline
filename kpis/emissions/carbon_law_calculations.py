@@ -61,48 +61,17 @@ def calculate_carbon_law_future_emissions(
     return carbon_law_dict
 
 
-def calculate_carbon_law_total_future_emissions(
-    input_df,
-    current_year=2025,
-    last_year_with_smhi_data=2023,
-    end_year=2050,
-    reduction_rate=CARBON_LAW_REDUCTION_RATE,
-):
+def sum_carbon_law_total_future_emissions(input_dict):
     """
-    Calculate the total cumulative future emissions for each municipality
-    following the Carbon Law reduction path.
+    Sum the total cumulative future emissions following the Carbon Law reduction path.
 
     Args:
-        df (pandas.DataFrame): DataFrame containing municipality emission data
-        current_year (int): The current year to start projections from
-        last_year_with_smhi_data (int): Last year with recorded SMHI data
-        end_year (int): End year for projections (default 2050)
-        reduction_rate (float): Annual reduction rate (default 11.72% = 0.1172)
+        input_dict (dict): Dict with year as key and emission as value for carbon law path
 
     Returns:
-        pandas.DataFrame: DataFrame with added 'carbonLawTotalFutureEmissions' column
-                         containing the total cumulative future emissions
+        Value of total emissions of carbon law path
     """
-    # First calculate the future emissions if not already present
-    if "carbonLawFuture" not in input_df.columns:
-        input_df = calculate_carbon_law_future_emissions(
-            input_df, current_year, last_year_with_smhi_data, end_year, reduction_rate
-        )
-
-    temp = []
-    for i in range(len(input_df)):
-        if input_df.iloc[i]["carbonLawFuture"]:
-            # Use trapezoidal rule to integrate future emissions
-            y_values = list(input_df.iloc[i]["carbonLawFuture"].values())
-            x_values = list(input_df.iloc[i]["carbonLawFuture"].keys())
-            total_future_emissions = np.trapz(y_values, x_values)
-        else:
-            total_future_emissions = 0
-
-        temp.append(total_future_emissions)
-
-    input_df["carbonLawTotalFutureEmissions"] = temp
-    return input_df
+    return sum(input_dict.values())
 
 
 def calculate_carbon_law_net_zero_date(
@@ -174,7 +143,7 @@ def carbon_law_calculations(
     )
 
     # Calculate total future emissions
-    df_carbon_law_total = calculate_carbon_law_total_future_emissions(
+    df_carbon_law_total = sum_carbon_law_total_future_emissions(
         df_carbon_law_future,
         current_year,
         last_year_with_smhi_data,
