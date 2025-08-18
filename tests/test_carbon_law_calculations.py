@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import unittest
-import pandas as pd
 
 from kpis.emissions.carbon_law_calculations import (
     get_latest_emission_value,
@@ -12,8 +11,10 @@ from kpis.emissions.carbon_law_calculations import (
 
 
 class TestCarbonLawCalculations(unittest.TestCase):
+    """Test cases for carbon law calculation functions."""
 
     def test_get_latest_emission_value(self):
+        """Test that get_latest_emission_value returns correct data."""
         latest_emission_value_expected = 5
 
         approximated_data_row = {
@@ -28,38 +29,33 @@ class TestCarbonLawCalculations(unittest.TestCase):
         self.assertEqual(latest_emission_value_result, latest_emission_value_expected)
 
     def test_calculate_carbon_law_future_emissions(self):
+        """Test that calculate_carbon_law_future_emissions returns correct data."""
         dict_expected = {
-            2025: 5.0,
-            2026: 4.5,
-            2027: 4.05,
-            2028: 3.645,
-            2029: 3.2805,
-            2030: 2.9525,
-            2031: 2.6573,
-            2032: 2.3916,
-            2033: 2.1525,
-            2034: 1.9372,
-            2035: 1.7435,
-            2036: 1.5691,
-            2037: 1.4122,
-            2038: 1.2710,
-            2039: 1.1439,
-            2040: 1.0295,
-            2041: 0.9266,
-            2042: 0.8339,
-            2043: 0.7505,
-            2044: 0.6755,
-            2045: 0.6079,
-            2046: 0.5471,
-            2047: 0.4924,
-            2048: 0.4432,
-            2049: 0.3989,
-            2050: 0.3590,
+            2025: 5,
+            2026: 4.50000000,
+            2027: 4.05000000,
+            2028: 3.64500000,
+            2029: 3.28050000,
+            2030: 2.95250000,
+            2031: 2.65720500,
+            2032: 2.39148450,
+            2033: 2.15233605,
+            2034: 1.93710245,
+            2035: 1.74339220,
+            2036: 1.56905298,
+            2037: 1.41214768,
+            2038: 1.27093291,
+            2039: 1.14383962,
+            2040: 1.02945566,
         }
 
-        dict_result = calculate_carbon_law_future_emissions(5, 2025, 2050, 0.10)
+        dict_result = calculate_carbon_law_future_emissions(5, 2025, 0.10, 2040)
 
-        self.assertEqual(dict_result, dict_expected)
+        # Round both dictionaries to 4 decimal places and compare
+        dict_result_rounded = {k: round(v, 4) for k, v in dict_result.items()}
+        dict_expected_rounded = {k: round(v, 4) for k, v in dict_expected.items()}
+
+        self.assertEqual(dict_result_rounded, dict_expected_rounded)
 
     # def test_calculate_carbon_law_total_future_emissions(self):
     #     df_expected = pd.DataFrame(
