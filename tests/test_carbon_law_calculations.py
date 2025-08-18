@@ -5,7 +5,6 @@ from kpis.emissions.carbon_law_calculations import (
     get_latest_emission_value,
     calculate_carbon_law_future_emissions,
     sum_carbon_law_total_future_emissions,
-    calculate_carbon_law_net_zero_date,
     carbon_law_calculations,
 )
 
