@@ -73,10 +73,9 @@ def sum_carbon_law_total_future_emissions(input_dict):
 
 def carbon_law_calculations(
     input_df,
-    current_year=2025,
-    last_year_with_smhi_data=2023,
-    end_year=2050,
-    reduction_rate=CARBON_LAW_REDUCTION_RATE,
+    current_year,
+    end_year,
+    reduction_rate,
 ):
     """
     Perform all Carbon Law calculations for the given DataFrame.
@@ -92,22 +91,5 @@ def carbon_law_calculations(
         pandas.DataFrame: DataFrame with all Carbon Law calculations added
     """
     # Calculate future emissions following Carbon Law
-    df_carbon_law_future = calculate_carbon_law_future_emissions(
-        input_df, current_year, last_year_with_smhi_data, end_year, reduction_rate
-    )
 
-    # Calculate total future emissions
-    df_carbon_law_total = sum_carbon_law_total_future_emissions(
-        df_carbon_law_future,
-        current_year,
-        last_year_with_smhi_data,
-        end_year,
-        reduction_rate,
-    )
-
-    # Calculate net zero dates
-    df_carbon_law_complete = calculate_carbon_law_net_zero_date(
-        df_carbon_law_total, current_year, last_year_with_smhi_data, reduction_rate
-    )
-
-    return df_carbon_law_complete
+    return 0
