@@ -85,28 +85,25 @@ class TestCarbonLawCalculations(unittest.TestCase):
 
     def test_carbon_law_calculations(self):
         """Test that carbon_law_calculations returns correct data."""
-        df_expected = pd.DataFrame(
-            {
-                "Kommun": ["Ale"],
-                "totalCarbonLawPath": 40.73494905,
-            }
-        )
+        expected_value = 40.73494905
 
         input_df = pd.DataFrame(
             {
-                "Kommun": "Ale",
-                2019: 1,
-                2020: 1,
-                "approximatedHistorical": {2020: 1, 2021: 2, 2022: 4, 2023: 3, 2024: 5},
+                "Kommun": ["Ale"],
+                2021: [1],
+                2022: [2],
+                "approximatedHistorical": [{2023: 4, 2024: 3, 2025: 5}],
             }
         )
 
         df_result = carbon_law_calculations(input_df, 2025, 2040, 0.10)
 
-        pd.testing.assert_frame_equal(
-            df_result[df_result["Kommun"] == "Ale"]["totalCarbonLawPath"],
-            df_expected[df_expected["Kommun"] == "Ale"]["totalCarbonLawPath"],
-        )
+        # Get the totalCarbonLawPath value for the row where Kommun equals "Ale"
+        ale_result = df_result[df_result["Kommun"] == "Ale"]["totalCarbonLawPath"].iloc[
+            0
+        ]
+
+        self.assertEqual(ale_result, expected_value)
 
 
 if __name__ == "__main__":

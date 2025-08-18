@@ -81,15 +81,30 @@ def carbon_law_calculations(
     Perform all Carbon Law calculations for the given DataFrame.
 
     Args:
-        df (pandas.DataFrame): DataFrame containing municipality emission data
+        input_df (pandas.DataFrame): DataFrame containing municipality emission data
         current_year (int): The current year
-        last_year_with_smhi_data (int): Last year with recorded SMHI data
         end_year (int): End year for projections (default 2050)
         reduction_rate (float): Annual reduction rate (default 11.72% = 0.1172)
 
     Returns:
         pandas.DataFrame: DataFrame with all Carbon Law calculations added
     """
-    # Calculate future emissions following Carbon Law
+    # Initialize the totalCarbonLawPath column
+    input_df["totalCarbonLawPath"] = 0.0
 
-    return 0
+    # Calculate carbon law path and total future emissions for each municipality
+    for i in range(len(input_df)):
+        # Get the latest emission value
+        latest_emission = get_latest_emission_value(input_df.iloc[i], current_year)
+
+        # Calculate the carbon law path
+        df_carbon_law_future = calculate_carbon_law_future_emissions(
+            latest_emission, current_year, reduction_rate, end_year
+        )
+
+        # Sum the total future emissions
+        input_df.loc[i, "totalCarbonLawPath"] = sum_carbon_law_total_future_emissions(
+            df_carbon_law_future
+        )
+
+    return input_df
