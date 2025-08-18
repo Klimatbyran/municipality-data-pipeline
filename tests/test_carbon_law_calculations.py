@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
+import pandas as pd
 
 from kpis.emissions.carbon_law_calculations import (
     get_latest_emission_value,
@@ -82,23 +83,30 @@ class TestCarbonLawCalculations(unittest.TestCase):
 
         self.assertEqual(value_result, value_expected)
 
-    # def test_carbon_law_calculations(self):
-    #     df_expected = pd.DataFrame(
-    #         {
-    #             "Kommun": ["Ale", "Alingsås", "Alvesta"],
-    #             "x": [
-    #                 1,
-    #                 1,
-    #                 1,
-    #             ],
-    #         }
-    #     )
+    def test_carbon_law_calculations(self):
+        """Test that carbon_law_calculations returns correct data."""
+        df_expected = pd.DataFrame(
+            {
+                "Kommun": ["Ale"],
+                "totalCarbonLawPath": 40.73494905,
+            }
+        )
 
-    #     df_result = carbon_law_calculations()
+        input_df = pd.DataFrame(
+            {
+                "Kommun": "Ale",
+                2019: 1,
+                2020: 1,
+                "approximatedHistorical": {2020: 1, 2021: 2, 2022: 4, 2023: 3, 2024: 5},
+            }
+        )
 
-    #     pd.testing.assert_frame_equal(
-    #         df_result.iloc[:3], df_expected, check_dtype=False
-    #     )
+        df_result = carbon_law_calculations(input_df, 2025, 2040, 0.10)
+
+        pd.testing.assert_frame_equal(
+            df_result[df_result["Kommun"] == "Ale"]["totalCarbonLawPath"],
+            df_expected[df_expected["Kommun"] == "Ale"]["totalCarbonLawPath"],
+        )
 
 
 if __name__ == "__main__":
