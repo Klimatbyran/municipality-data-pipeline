@@ -83,24 +83,6 @@ class TestCarbonLawCalculations(unittest.TestCase):
 
         self.assertEqual(value_result, value_expected)
 
-    # def test_calculate_carbon_law_net_zero_date(self):
-    #     df_expected = pd.DataFrame(
-    #         {
-    #             "Kommun": ["Ale", "Alingsås", "Alvesta"],
-    #             "x": [
-    #                 1,
-    #                 1,
-    #                 1,
-    #             ],
-    #         }
-    #     )
-
-    #     df_result = calculate_carbon_law_net_zero_date()
-
-    #     pd.testing.assert_frame_equal(
-    #         df_result.iloc[:3], df_expected, check_dtype=False
-    #     )
-
     # def test_carbon_law_calculations(self):
     #     df_expected = pd.DataFrame(
     #         {

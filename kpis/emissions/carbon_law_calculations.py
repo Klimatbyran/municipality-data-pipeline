@@ -1,6 +1,3 @@
-import numpy as np
-
-
 # Carbon Law reduction rate: 11.72% per year
 CARBON_LAW_REDUCTION_RATE = 0.1172
 # This means each year should be (1 - 0.1172) = 0.8828 of the previous year
@@ -72,49 +69,6 @@ def sum_carbon_law_total_future_emissions(input_dict):
         Value of total emissions of carbon law path
     """
     return sum(input_dict.values())
-
-
-def calculate_carbon_law_net_zero_date(
-    input_df,
-    current_year=2025,
-    last_year_with_smhi_data=2023,
-    reduction_rate=CARBON_LAW_REDUCTION_RATE,
-):
-    """
-    Calculate when each municipality would reach net zero emissions
-    following the Carbon Law reduction path.
-
-    Args:
-        df (pandas.DataFrame): DataFrame containing municipality emission data
-        current_year (int): The current year
-        last_year_with_smhi_data (int): Last year with recorded SMHI data
-        reduction_rate (float): Annual reduction rate (default 11.72% = 0.1172)
-
-    Returns:
-        pandas.DataFrame: DataFrame with added 'carbonLawNetZeroYear' column
-                         containing the year when net zero is reached (or None if never)
-    """
-    annual_factor = 1 - reduction_rate
-    temp = []
-
-    for i in range(len(input_df)):
-        # Get the latest emission value
-        latest_emission, latest_year = get_latest_emission_value(
-            input_df.iloc[i], current_year, last_year_with_smhi_data
-        )
-
-        # Calculate how many years it takes to reach near zero (< 1 tonne)
-        if latest_emission <= 1:  # Already at net zero
-            temp.append(latest_year)
-        else:
-            # Calculate years needed: emission * (annual_factor)^years < 1
-            # Solving: years > log(1/emission) / log(annual_factor)
-            years_to_net_zero = np.log(1 / latest_emission) / np.log(annual_factor)
-            net_zero_year = latest_year + int(np.ceil(years_to_net_zero))
-            temp.append(net_zero_year)
-
-    input_df["carbonLawNetZeroYear"] = temp
-    return input_df
 
 
 def carbon_law_calculations(
