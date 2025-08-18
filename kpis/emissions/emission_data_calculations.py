@@ -13,15 +13,20 @@ from kpis.emissions.trend_calculations import (
     calculate_trend_coefficients,
     calculate_trend,
 )
+from kpis.emissions.carbon_law_calculations import carbon_law_calculations
 
 
 CURRENT_YEAR = 2025  # current year
-YEAR_SECONDS = 60 * 60 * 24 * 365  # a year in seconds
-
-
 LAST_YEAR_WITH_SMHI_DATA = (
     2023  # last year for which the National Emission database has data
 )
+
+END_YEAR = 2050
+
+CARBON_LAW_REDUCTION_RATE = 0.1172
+
+YEAR_SECONDS = 60 * 60 * 24 * 365  # a year in seconds
+
 PATH_SMHI = "https://nationellaemissionsdatabasen.smhi.se/api/getexcelfile/?county=0&municipality=0&sub=CO2"
 
 
@@ -227,8 +232,8 @@ def calculate_paris_path(df, last_year_in_range, current_year, budget_year):
         # We'll store the exponential path for each municipality in a dictionary
         # where the keys are the years
         dicts = {}
-        # Years range will be set to from when the budget applies until 2050
-        years_range = range(first_year, 2050 + 1)
+        # Years range will be set to from when the budget applies until end year
+        years_range = range(first_year, END_YEAR + 1)
 
         for year in years_range:
             # Calculate what the emission level has to be at future year
@@ -496,4 +501,11 @@ def emission_calculations(df):
         df_net_zero, CURRENT_YEAR, BUDGET_YEAR
     )
 
-    return df_budget_runs_out
+    df_carbon_law = carbon_law_calculations(
+        df_budget_runs_out,
+        CURRENT_YEAR,
+        END_YEAR,
+        CARBON_LAW_REDUCTION_RATE,
+    )
+
+    return df_carbon_law
