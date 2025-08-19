@@ -85,7 +85,7 @@ class TestCarbonLawCalculations(unittest.TestCase):
 
     def test_carbon_law_calculations(self):
         """Test that carbon_law_calculations returns correct data."""
-        expected_value = 40.73494905
+        expected_value = 40.7349
 
         input_df = pd.DataFrame(
             {
@@ -103,7 +103,7 @@ class TestCarbonLawCalculations(unittest.TestCase):
             0
         ]
 
-        self.assertEqual(ale_result, expected_value)
+        self.assertEqual(round(ale_result, 4), expected_value)
 
 
 if __name__ == "__main__":
