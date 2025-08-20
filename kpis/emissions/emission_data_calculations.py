@@ -27,7 +27,10 @@ CARBON_LAW_REDUCTION_RATE = 0.1172
 
 YEAR_SECONDS = 60 * 60 * 24 * 365  # a year in seconds
 
-PATH_SMHI = "https://nationellaemissionsdatabasen.smhi.se/api/getexcelfile/?county=0&municipality=0&sub=CO2"
+PATH_SMHI = (
+    "https://nationellaemissionsdatabasen.smhi.se/api/"
+    + "getexcelfile/?county=0&municipality=0&sub=GGT"
+)
 
 
 # ------- NATIONAL CARBON BUDGETS AND OVERHEADS -------
