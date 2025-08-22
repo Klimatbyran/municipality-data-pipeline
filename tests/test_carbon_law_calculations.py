@@ -6,7 +6,7 @@ from kpis.emissions.carbon_law_calculations import (
     get_latest_emission_value,
     calculate_carbon_law_future_emissions,
     sum_carbon_law_total_future_emissions,
-    carbon_law_calculations,
+    calculate_carbon_law_total,
 )
 
 
@@ -96,7 +96,7 @@ class TestCarbonLawCalculations(unittest.TestCase):
             }
         )
 
-        df_result = carbon_law_calculations(input_df, 2025, 2040, 0.10)
+        df_result = calculate_carbon_law_total(input_df, 2025, 2040, 0.10)
 
         # Get the totalCarbonLawPath value for the row where Kommun equals "Ale"
         ale_result = df_result[df_result["Kommun"] == "Ale"]["totalCarbonLawPath"].iloc[
