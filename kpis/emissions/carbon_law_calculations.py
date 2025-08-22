@@ -71,7 +71,7 @@ def sum_carbon_law_total_future_emissions(input_dict):
     return sum(input_dict.values())
 
 
-def carbon_law_calculations(
+def calculate_carbon_law_total(
     input_df,
     current_year,
     end_year,
