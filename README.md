@@ -53,7 +53,7 @@ To recalculate and refresh the site's data, execute the following command:
 
 `python3 climate_data_calculations.py`
 
-The results will be saved in the `/output` folder, primarily in the `climate-data.json` file. The climate data is sourced using a TypeScript utility service located at `utils/climateDataService.tsx`. This service is responsible for fetching and manipulating the data found in `climate-data.json` for use throughout the website. To add or edit the descriptions of datasets that appear in the national overview on the website's homepage, make the necessary changes in `utils/datasetDefinitions.tsx`.
+The results will be saved in the `/output` folder, primarily in the `climate-data.json` file.
 
 #### Handling Data Inconsistencies for Municipalities
 
@@ -71,7 +71,7 @@ In the list, the term appearing before the colon (:) is the standardized name th
 
 ### Emission Calculations 
 
-The folder `/kpis/emissions` contains files with functions to perform calculations related to CO2 emissions for municipalities, based on SMHI emission data and a given total CO2 budget for Sweden. Each function serves a specific purpose such as preprocessing data, calculating municipality-specific budgets, future trends or when the budget for a municipality will run out. Their order of execution is specified in `/kpis/emissions/emission_data_calculations.py`.
+The folder `/kpis/emissions` contains files with functions to perform calculations related to CO2 emissions for municipalities, based on SMHI emission data and a given total CO2 budget for Sweden. Each function serves a specific purpose such as preprocessing data or future trends. Their order of execution is specified in `/kpis/emissions/emission_data_calculations.py`.
 
 #### Constants 
 
@@ -99,21 +99,11 @@ Here's a summary of what the functions do, in order of execution in `/kpis/emiss
 
 5. `calculate_trend`: Calculates trend line for future years up to 2050. This is done by interpolation using previously calculated linear trend coefficients
 
-6. `calculate_n_subtract_national_overheads`: Calculates the national overhead for a CO2 budget for `NATIONAL_BUDGET_15`, based on `NATIONAL_BUDGET_17` and `NATIONAL_OVERHEAD_17`. This is achieved by determining the proportion of the national overhead within the total budget and then calculating corresponding value for `NATIONAL_BUDGET_15`. All values are in metric tonnes.
+6. `calculate_historical_change_percent`: Calculates the average historical yearly emission change in percent based on SMHI data from 2015 onwards.
 
-7. `calculate_municipality_budgets`: Calculates municipality specific CO2 budgets by deriving budget shares from the SMHI data for each municipality (using grand fathering) and multiplying them with the given total CO2 budget.
+7. `emission_calculations`: Orchestrates the execution of the above methods in sequence to perform all emission calculations for municipalities.
 
-8. `calculate_paris_path`: Calculates an exponential curve satisfying each municipality's CO2 budget (Paris Agreement path), starting from the year the budget kicks in.
-
-9. `calculate_historical_change_percent`: Calculates the average historical yearly emission change in percent based on SMHI data from 2015 onwards.
-
-10. `calculate_needed_change_percent`: Calculates the yearly decrease in percent needed to reach the Paris Agreement goal.
-
-11. `calculate_hit_net_zero`: Calculates the date and year for when each municipality hits net zero emissions (if so). This, by deriving where the trend line crosses the time axis.
-
-12. `calculate_budget_runs_out`: Calculates the year and date for when the CO2 budget runs out for each municipality (if so). This, by integrating the trend line over the time it takes for the budget to be consumed and see where we are at the time axis by that point.
-
-13. `emission_calculations`: Orchestrates the execution of the above methods in sequence to perform all emission calculations for municipalities.
+8. `calculate_carbon_law_total`: Calculates total emissions from carbon law reduction path for municipalities.
 
 ## Contributing
 
