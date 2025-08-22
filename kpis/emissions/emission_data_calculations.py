@@ -295,44 +295,6 @@ def calculate_historical_change_percent(df, last_year_in_range):
     return df
 
 
-def calculate_needed_change_percent(df, current_year, budget_year):
-    """
-    Calculate the needed yearly emission level decrease to reach the Paris goal. Set to None if budget is <= 0.
-
-    Args:
-        df (pandas.DataFrame): The input DataFrame containing emission data.
-
-    Returns:
-        pandas.DataFrame: The input DataFrame with an additional column
-                          'neededEmissionChangePercent' representing the
-                          percentage change in emission levels needed to reach the goal.
-                          This is None if the goal is unreachable.
-    """
-
-    # Year from which the paris path starts
-    first_year = max(budget_year, current_year)
-
-    temp = []
-    for i in range(len(df)):
-        if df.iloc[i]["Budget"] <= 0:
-            temp.append(None)
-        else:
-            # arbitrarily chosen years
-            start = df.iloc[i]["parisPath"][first_year + 1]
-            final = df.iloc[i]["parisPath"][first_year + 2]
-            temp.append(((start - final) / start) * 100)
-
-    # Ensure the column is of object type to handle None correctly
-    df["neededEmissionChangePercent"] = temp
-
-    # Replace NaN values with None
-    df["neededEmissionChangePercent"] = df["neededEmissionChangePercent"].replace(
-        {np.nan: None}
-    )
-
-    return df
-
-
 def calculate_hit_net_zero(df, last_year_in_range):
     """
     Calculates the date and year for when each municipality hits net zero emissions (if so).
