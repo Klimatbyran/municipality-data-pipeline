@@ -22,7 +22,7 @@ YEAR_SECONDS = 60 * 60 * 24 * 365  # a year in seconds
 LAST_YEAR_WITH_SMHI_DATA = (
     2023  # last year for which the National Emission database has data
 )
-PATH_SMHI = "https://nationellaemissionsdatabasen.smhi.se/api/getexcelfile/?county=0&municipality=0&sub=CO2"
+PATH_SMHI = "https://nationellaemissionsdatabasen.smhi.se/api/getexcelfile/?county=0&municipality=0&sub=GGT"
 
 
 # ------- NATIONAL CARBON BUDGETS AND OVERHEADS -------
