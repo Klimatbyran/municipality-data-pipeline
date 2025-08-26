@@ -12,6 +12,8 @@ from matplotlib.backends.backend_pdf import PdfPages
 warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
+OUTPUT_PATH = f"municipality_trends_{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.pdf"
+
 
 def load_climate_data(json_path):
     """Load climate data from JSON file and organize it by municipality."""
@@ -22,7 +24,7 @@ def load_climate_data(json_path):
 
     count = 0
     for municipality in data:
-        if count >= 5:
+        if count >= 290:
             break
 
         name = municipality["name"]
@@ -76,7 +78,6 @@ def lad_anchored(years, emissions, years_future):
     observed year for numerical stability. Returns predictions anchored
     to the last observed emission value.
     """
-    # Ensure numpy float arrays
     years = np.asarray(years, dtype=float)
     emissions = np.asarray(emissions, dtype=float)
     years_future = np.asarray(years_future, dtype=float)
@@ -86,17 +87,17 @@ def lad_anchored(years, emissions, years_future):
     years, emissions = years[order], emissions[order]
 
     # Center years at the last observed year (e.g., 2023 -> 0)
-    x = years - years[-1]
-    xf = years_future - years[-1]
+    historical_years_centered = years - years[-1]
+    future_years_centered = years_future - years[-1]
 
-    X = sm.add_constant(x)  # shape (n, 2)
-    Xf = sm.add_constant(xf)  # shape (m, 2)
+    historical_design_matrix = sm.add_constant(
+        historical_years_centered
+    )  # shape (n, 2)
+    future_design_matrix = sm.add_constant(future_years_centered)  # shape (m, 2)
 
-    # Fit LAD (Quantile Regression at q=0.5)
-    res = sm.QuantReg(emissions, X).fit(q=0.5)
+    res = sm.QuantReg(emissions, historical_design_matrix).fit(q=0.5)
+    preds = res.predict(future_design_matrix)
 
-    # Predict and anchor so the curve passes exactly through the last obs
-    preds = res.predict(Xf)
     intercept_at_last = res.predict([1.0, 0.0])[0]  # x=0 == last year
     shift = emissions[-1] - intercept_at_last
     return preds + shift
@@ -193,11 +194,6 @@ if __name__ == "__main__":
 
     # Create sets of municipalities for plotting
     municipality_sets = create_municipality_sets(municipalities)
-
-    # Generate output file
-    OUTPUT_PATH = (
-        f"municipality_trends_{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.pdf"
-    )
 
     with PdfPages(OUTPUT_PATH) as pdf:
         for i, municipality_set in enumerate(municipality_sets, 1):
