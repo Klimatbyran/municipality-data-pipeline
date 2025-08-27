@@ -10,7 +10,7 @@ CURRENT_YEAR = 2025
 NATIONAL_BUDGET = 80e6
 BUDGET_YEAR = 2024
 
-PATH_SMHI = "https://nationellaemissionsdatabasen.smhi.se/api/getexcelfile/?county=0&municipality=0&sub=CO2"
+PATH_SMHI = "https://nationellaemissionsdatabasen.smhi.se/api/getexcelfile/?county=0&municipality=0&sub=GGT"
 
 
 class TestEmissionData(unittest.TestCase):
@@ -32,8 +32,8 @@ class TestEmissionData(unittest.TestCase):
         df_expected = pd.DataFrame(
             {
                 "Kommun": ["Ale", "Skövde"],
-                2022: [127275.382, 536185.9645],
-                2023: [121635.2675, 470188.5876],
+                2022: [142529.055614, 614718.404112],
+                2023: [136223.552398, 546838.611789],
             }
         )
 
