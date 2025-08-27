@@ -3,13 +3,13 @@ import json
 from pathlib import Path
 from unittest.mock import patch
 import pandas as pd
+from kpis.emissions.historical_data_calculations import (
+    extract_sector_data,
+    get_smhi_data,
+)
 from sector_emissions import (
     create_sector_emissions_dict,
     generate_sector_emissions_file,
-)
-from kpis.emissions.historical_data_calculations import (
-    get_smhi_data,
-    extract_sector_data,
 )
 
 
