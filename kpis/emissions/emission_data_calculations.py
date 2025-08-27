@@ -95,9 +95,11 @@ def deduct_cement(df, cement_deduction):
     # Deduct cement from given municipalities
     for i in cement_deduction.keys():
         for j in cement_deduction[i].keys():
-            df_cem.loc[df_cem["Kommun"] == i, j] = (
-                df_cem.loc[df_cem["Kommun"] == i, j].values - cement_deduction[i][j]
-            )
+            # Only deduct if the year column exists in the DataFrame
+            if j in df_cem.columns:
+                df_cem.loc[df_cem["Kommun"] == i, j] = (
+                    df_cem.loc[df_cem["Kommun"] == i, j].values - cement_deduction[i][j]
+                )
 
     return df_cem
 
