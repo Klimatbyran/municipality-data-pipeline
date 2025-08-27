@@ -27,22 +27,6 @@ PATH_SMHI = (
     + "getexcelfile/?county=0&municipality=0&sub=GGT"
 )
 
-# ------- NATIONAL CARBON BUDGETS AND OVERHEADS -------
-
-# Numbers below from
-# https://www.cemus.uu.se/wp-content/uploads/2023/12/Paris-compliant-carbon-budgets-for-Swedens-counties-.pdf
-# Found in tables on page 10 and 19. The numbers are in metric tonnes.
-
-# National C02 budget for 50% chance of staying below 1.5 degrees
-NATIONAL_BUDGET_15 = 80e6
-# National C02 budget for 50% chance of staying below 1.7 degrees
-NATIONAL_BUDGET_17 = 285e6
-# National overhead for 1.7 degree scenario, 53 433 000 + 1 364 000 rounded to match preciseness of the other numbers
-NATIONAL_OVERHEAD_17 = 55e6
-# Year from which the carbon budgets applies
-BUDGET_YEAR = 2024
-
-
 # ------- CEMENT CARBON EMISSIONS -------
 
 # Sources for cement deduction
