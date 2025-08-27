@@ -18,18 +18,14 @@ CURRENT_YEAR = 2025  # current year
 LAST_YEAR_WITH_SMHI_DATA = (
     2023  # last year for which the National Emission database has data
 )
-
 END_YEAR = 2050
 
 CARBON_LAW_REDUCTION_RATE = 0.1172
-
-YEAR_SECONDS = 60 * 60 * 24 * 365  # a year in seconds
 
 PATH_SMHI = (
     "https://nationellaemissionsdatabasen.smhi.se/api/"
     + "getexcelfile/?county=0&municipality=0&sub=GGT"
 )
-
 
 # ------- NATIONAL CARBON BUDGETS AND OVERHEADS -------
 

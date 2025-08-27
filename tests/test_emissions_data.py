@@ -5,6 +5,7 @@ import pandas as pd
 from kpis.emissions.historical_data_calculations import get_smhi_data
 from kpis.emissions.historical_data_calculations import get_n_prep_data_from_smhi
 
+
 LAST_YEAR_WITH_SMHI_DATA = 2023
 CURRENT_YEAR = 2025
 NATIONAL_BUDGET = 80e6

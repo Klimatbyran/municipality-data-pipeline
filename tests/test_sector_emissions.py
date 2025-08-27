@@ -7,6 +7,10 @@ from sector_emissions import (
     create_sector_emissions_dict,
     generate_sector_emissions_file,
 )
+from kpis.emissions.historical_data_calculations import (
+    get_smhi_data,
+    extract_sector_data,
+)
 
 
 class TestSectorEmissions(unittest.TestCase):
@@ -78,6 +82,36 @@ class TestSectorEmissions(unittest.TestCase):
             generate_sector_emissions_file(str(output_file))
             self._verify_generated_file(output_file)
             output_file.unlink()
+
+    def test_karlshamn_jordbruk_2023_integration(self):
+        """Integration test to verify Karlshamn's jordbruk sector value for 2023."""
+        # This test runs the actual functions without mocking to verify real data
+        df_raw = get_smhi_data()
+        df_sectors = extract_sector_data(df_raw)
+
+        # Create the sector emissions dictionary with 2 decimal places
+        result = create_sector_emissions_dict(df_sectors, num_decimals=2)
+
+        karlshamn_data = next(
+            (
+                municipality
+                for municipality in result
+                if municipality["name"] == "Karlshamn"
+            ),
+            None,
+        )
+        # Assert that Karlshamn exists in the data
+        self.assertIsNotNone(karlshamn_data)
+
+        # Assert that 2023 data exists
+        self.assertIn("2023", karlshamn_data["sectors"])
+
+        # Assert that jordbruk sector exists for 2023
+        self.assertIn("Jordbruk", karlshamn_data["sectors"]["2023"])
+
+        # Assert the expected value
+        actual_value = karlshamn_data["sectors"]["2023"]["Jordbruk"]
+        self.assertEqual(actual_value, 14786.00)
 
     def _verify_generated_file(self, output_file):
         """Verify the generated file exists and contains correct data."""
