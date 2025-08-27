@@ -3,10 +3,10 @@
 
 import numpy as np
 
-from kpis.emissions.historical_data_calculations import get_n_prep_data_from_smhi
 from kpis.emissions.approximated_data_calculations import (
     calculate_approximated_historical,
 )
+from kpis.emissions.historical_data_calculations import get_n_prep_data_from_smhi
 from kpis.emissions.trend_calculations import (
     calculate_trend_coefficients,
     calculate_trend,
