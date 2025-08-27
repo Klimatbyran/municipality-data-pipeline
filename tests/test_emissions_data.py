@@ -8,8 +8,6 @@ from kpis.emissions.historical_data_calculations import get_n_prep_data_from_smh
 
 LAST_YEAR_WITH_SMHI_DATA = 2023
 CURRENT_YEAR = 2025
-NATIONAL_BUDGET = 80e6
-BUDGET_YEAR = 2024
 
 PATH_SMHI = (
     "https://nationellaemissionsdatabasen.smhi.se/api"

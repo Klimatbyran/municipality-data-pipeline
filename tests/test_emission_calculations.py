@@ -17,8 +17,6 @@ from kpis.emissions.approximated_data_calculations import (
 
 LAST_YEAR_WITH_SMHI_DATA = 2021
 CURRENT_YEAR = 2024
-NATIONAL_BUDGET = 80e6
-BUDGET_YEAR = 2024
 
 
 class TestEmissionCalculations(unittest.TestCase):
