@@ -1,89 +1,33 @@
 import numpy as np
+import statsmodels.api as sm
 
 
-def calculate_trend_coefficients(input_df, last_year_with_smhi_data):
+def lad_anchored(years, emissions, years_future):
     """
-    Calculate linear trend coefficients for each municipality based on SMHI data from 2015 onwards.
-
-    Parameters:
-    - df: DataFrame containing the data for each municipality.
-    - last_year_with_smhi_data: The last year for which SMHI data is available.
-
-    Returns:
-    - df: DataFrame with an additional column 'trendCoefficients' containing
-          the calculated trend coefficients for each municipality.
+    LAD (median/quantile) regression, with years centered at the last
+    observed year for numerical stability. Returns predictions anchored
+    to the last observed emission value.
     """
+    years = np.asarray(years, dtype=float)
+    emissions = np.asarray(emissions, dtype=float)
+    years_future = np.asarray(years_future, dtype=float)
 
-    temp = []  # temporary list that we will append to
-    input_df = input_df.sort_values("Kommun", ascending=True)
-    for i in range(len(input_df)):
-        # NOTE: Years range can be changed
-        years_range = np.arange(2015, last_year_with_smhi_data + 1)
-        # Get the emissions from the years specified in the line above
-        emissions_data = np.array(input_df.iloc[i][years_range], dtype=float)
-        # Fit a straight line to the data defined above using least squares
-        fit = np.polyfit(years_range, emissions_data, 1)
-        temp.append(fit)
+    # Sort by year just in case
+    order = np.argsort(years)
+    years, emissions = years[order], emissions[order]
 
-    input_df["trendCoefficients"] = temp
+    # Center years at the last observed year (e.g., 2023 -> 0)
+    historical_years_centered = years - years[-1]
+    future_years_centered = years_future - years[-1]
 
-    return input_df
+    historical_design_matrix = sm.add_constant(
+        historical_years_centered
+    )  # shape (n, 2)
+    future_design_matrix = sm.add_constant(future_years_centered)  # shape (m, 2)
 
+    res = sm.QuantReg(emissions, historical_design_matrix).fit(q=0.5)
+    preds = res.predict(future_design_matrix)
 
-def calculate_trend(input_df, last_year_with_smhi_data, correct_year):
-    """
-    Calculate the trend line for future years up to 2050 using interpolation
-    and previously calculated linear trend coefficients.
-
-    Args:
-        df (pandas.DataFrame): The input DataFrame containing the data.
-        last_year_with_smhi_data (int): The last year with SMHI data available.
-        correct_year (int): The correct year to start the trend line from.
-
-    Returns:
-        pandas.DataFrame: The input DataFrame with additional columns
-                          for the trend line and trend emission values.
-    """
-
-    # Calculate trend line for future years up to 2050
-    # This is done by interpolation using previously calculated linear trend coefficients
-
-    # Get years between next year and 2050
-    future_years = range(correct_year + 1, 2050 + 1)
-
-    temp = []  # temporary list that we will append to
-    input_df = input_df.sort_values("Kommun", ascending=True)
-    for i in range(len(input_df)):
-        # We'll store the future trend line for each municipality in a dictionary where the keys
-        # are the years. The last recorded data point is initially added to the dict.
-        last_year_with_data_dict = {
-            last_year_with_smhi_data: input_df.iloc[i][last_year_with_smhi_data]
-        }
-
-        # If approximated historical values exist, overwrite trend dict to start from current year
-        if correct_year > last_year_with_smhi_data:
-            last_year_with_data_dict = {
-                correct_year: input_df.iloc[i]["approximatedHistorical"][correct_year]
-            }
-
-        # Get the trend coefficients
-        fit = input_df.iloc[i]["trendCoefficients"]
-
-        for year in future_years:
-            # Add the trend value for each year using the trend line coefficients.
-            # Max function so we don't get negative values
-            last_year_with_data_dict[year] = max(0, fit[0] * year + fit[1])
-        temp.append(last_year_with_data_dict)
-
-    input_df["trend"] = temp
-
-    temp = [
-        np.trapz(
-            list(input_df.iloc[i]["trend"].values()),
-            list(input_df.iloc[i]["trend"].keys()),
-        )
-        for i in range(len(input_df))
-    ]
-    input_df["trendEmission"] = temp
-
-    return input_df
+    intercept_at_last = res.predict([1.0, 0.0])[0]  # x=0 == last year
+    shift = emissions[-1] - intercept_at_last
+    return preds + shift, res.params[1]  # res.params[1] is slope
