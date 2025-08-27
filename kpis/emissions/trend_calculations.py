@@ -2,32 +2,63 @@ import numpy as np
 import statsmodels.api as sm
 
 
-def lad_anchored(years, emissions, years_future):
+def calculate_trend(input_df, current_year):
     """
     LAD (median/quantile) regression, with years centered at the last
     observed year for numerical stability. Returns predictions anchored
     to the last observed emission value.
+
+    Parameters:
+    - input_df (pandas.DataFrame): The input dataframe containing municipality data.
+    - years (list): The years of the emissions data.
+    - emissions (list): The emissions data.
+    - years_future (list): The years of the future emissions data.
+
+    Returns:
+    - input_df (pandas.DataFrame): DataFrame with added trend coefficients and predictions.
     """
-    years = np.asarray(years, dtype=float)
-    emissions = np.asarray(emissions, dtype=float)
-    years_future = np.asarray(years_future, dtype=float)
 
-    # Sort by year just in case
-    order = np.argsort(years)
-    years, emissions = years[order], emissions[order]
+    # Extract numerical columns (year columns) from the dataframe
+    numerical_cols = input_df.select_dtypes(include=[np.number]).columns
+    year_cols = [
+        col for col in numerical_cols if str(col).isdigit() and len(str(col)) == 4
+    ]
+    year_cols = sorted(year_cols)  # Sort years in ascending order
 
-    # Center years at the last observed year (e.g., 2023 -> 0)
-    historical_years_centered = years - years[-1]
-    future_years_centered = years_future - years[-1]
+    # Convert year column names to actual years
+    years = np.array([int(col) for col in year_cols], dtype=float)
 
-    historical_design_matrix = sm.add_constant(
-        historical_years_centered
-    )  # shape (n, 2)
-    future_design_matrix = sm.add_constant(future_years_centered)  # shape (m, 2)
+    # Generate future years from last year with data from SMHI+1 to current_year
+    years_future = np.arange(numerical_cols[-1] + 1, current_year + 1, dtype=float)
 
-    res = sm.QuantReg(emissions, historical_design_matrix).fit(q=0.5)
-    preds = res.predict(future_design_matrix)
+    # Process each municipality row
+    for idx in range(len(input_df)):
+        # Extract emissions data for this municipality from year columns
+        emissions = np.array(
+            [input_df.iloc[idx][col] for col in year_cols], dtype=float
+        )
 
-    intercept_at_last = res.predict([1.0, 0.0])[0]  # x=0 == last year
-    shift = emissions[-1] - intercept_at_last
-    return preds + shift, res.params[1]  # res.params[1] is slope
+        # Sort by year just in case
+        order = np.argsort(years)
+        years_sorted, emissions_sorted = years[order], emissions[order]
+
+        # Center years at the last observed year (e.g., 2023 -> 0)
+        historical_years_centered = years_sorted - years_sorted[-1]
+        future_years_centered = years_future - years_sorted[-1]
+
+        historical_design_matrix = sm.add_constant(
+            historical_years_centered
+        )  # shape (n, 2)
+        future_design_matrix = sm.add_constant(future_years_centered)  # shape (m, 2)
+
+        res = sm.QuantReg(emissions_sorted, historical_design_matrix).fit(q=0.5)
+        preds = res.predict(future_design_matrix)
+
+        intercept_at_last = res.predict([1.0, 0.0])[0]  # x=0 == last year
+        shift = emissions_sorted[-1] - intercept_at_last
+
+        # Store results in the dataframe
+        input_df.at[idx, "trend_coefficient"] = res.params[1]
+        input_df.at[idx, "trend_predictions"] = list(preds + shift)
+
+    return input_df
