@@ -7,9 +7,6 @@ from kpis.emissions.emission_data_calculations import (
     deduct_cement,
 )
 from kpis.emissions.trend_calculations import calculate_trend
-from kpis.emissions.approximated_data_calculations import (
-    calculate_approximated_historical,
-)
 
 
 LAST_YEAR_WITH_SMHI_DATA = 2021
@@ -115,9 +112,7 @@ class TestEmissionCalculations(unittest.TestCase):
         ]
         df_expected["totalApproximatedHistorical"] = [1560788.47673442]
 
-        df_result = calculate_approximated_historical(
-            df_input, LAST_YEAR_WITH_SMHI_DATA, CURRENT_YEAR
-        )
+        df_result = calculate_trend(df_input, CURRENT_YEAR)
 
         pd.testing.assert_frame_equal(df_result, df_expected, check_exact=False)
 

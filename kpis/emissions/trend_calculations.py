@@ -10,12 +10,11 @@ def calculate_trend(input_df, current_year):
 
     Parameters:
     - input_df (pandas.DataFrame): The input dataframe containing municipality data.
-    - years (list): The years of the emissions data.
-    - emissions (list): The emissions data.
     - years_future (list): The years of the future emissions data.
 
     Returns:
-    - input_df (pandas.DataFrame): DataFrame with added trend coefficients and predictions.
+    - input_df (pandas.DataFrame): DataFrame with added trend coefficients, aprroximated data
+                                   until current year and future predictions.
     """
 
     # Extract numerical columns (year columns) from the dataframe
