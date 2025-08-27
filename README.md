@@ -71,16 +71,12 @@ In the list, the term appearing before the colon (:) is the standardized name th
 
 ### Emission Calculations 
 
-The folder `/kpis/emissions` contains files with functions to perform calculations related to CO2 emissions for municipalities, based on SMHI emission data and a given total CO2 budget for Sweden. Each function serves a specific purpose such as preprocessing data or future trends. Their order of execution is specified in `/kpis/emissions/emission_data_calculations.py`.
+The folder `/kpis/emissions` contains files with functions to perform calculations related to CO2 emissions for municipalities, based on SMHI emission data and Carbon Law. Each function serves a specific purpose such as preprocessing data or future trends. Their order of execution is specified in `/kpis/emissions/emission_data_calculations.py`.
 
 #### Constants 
 
-The most important constants in the module are `NATIONAL_BUDGET_15`, `NATIONAL_BUDGET_17`, `NATIONAL_OVERHEAD_17`, `BUDGET_YEAR`, `CEMENT_DEDUCTION`, `LAST_YEAR_WITH_SMHI_DATA` and `CURRENT_YEAR` as they determine the baseline and scope of the calculations.
+The most important constants in the module are `CEMENT_DEDUCTION`, `LAST_YEAR_WITH_SMHI_DATA` and `CURRENT_YEAR` as they determine the baseline and scope of the calculations.
 
-* `NATIONAL_BUDGET_15`: Represents the total CO2 budget for a 50% chance of staying below 1.5 degrees, in metric tonnes.
-* `NATIONAL_BUDGET_17`: Represents the total CO2 budget for a 50% chance of staying below 1.7 degrees, in metric tonnes.
-* `NATIONAL_OVERHEAD_17`: Reprensents the total national overhead for `NATIONAL_BUDGET_17`, in metric tonnes.
-* `BUDGET_YEAR`: Represents the year from which the CO2 budget applies.
 * `CEMENT_DEDUCTION`: Represents the total CO2 emissions from cement production in municipalities with cement plants that were operational in 2015 or later.
 * `LAST_YEAR_WITH_SMHI_DATA`: Represents the last year for which the [National Emission database](https://nationellaemissionsdatabasen.smhi.se/) has data.
 * `CURRENT_YEAR`: Represents the year which is to be handled as current year.
@@ -101,9 +97,7 @@ Here's a summary of what the functions do, in order of execution in `/kpis/emiss
 
 6. `calculate_historical_change_percent`: Calculates the average historical yearly emission change in percent based on SMHI data from 2015 onwards.
 
-7. `emission_calculations`: Orchestrates the execution of the above methods in sequence to perform all emission calculations for municipalities.
-
-8. `calculate_carbon_law_total`: Calculates total emissions from carbon law reduction path for municipalities.
+7. `calculate_carbon_law_total`: Calculates total emissions from carbon law reduction path for municipalities.
 
 ## Contributing
 
