@@ -29,7 +29,7 @@ PATH_SMHI = (
 
 # ------- CEMENT CARBON EMISSIONS -------
 
-# Sources for cement deduction
+# Sources for cement deduction (use CO2 totalt)
 # Mörbylånga: https://utslappisiffror.naturvardsverket.se/sv/Sok/Anlaggningssida/?pid=1441
 # Skövde: https://utslappisiffror.naturvardsverket.se/sv/Sok/Anlaggningssida/?pid=5932
 # Gotland: https://utslappisiffror.naturvardsverket.se/sv/Sok/Anlaggningssida/?pid=834
@@ -46,6 +46,7 @@ CEMENT_DEDUCTION = {
         2021: 0,
         2022: 0,
         2023: 0,
+        2024: 0,
     },
     "Skövde": {
         2010: 356965000 / 1000,
@@ -58,6 +59,7 @@ CEMENT_DEDUCTION = {
         2021: 439174727 / 1000,
         2022: 406856000 / 1000,
         2023: 340611000 / 1000,
+        2024: 260927000 / 1000,
     },
     "Gotland": {
         2010: 1579811000 / 1000,
@@ -70,6 +72,7 @@ CEMENT_DEDUCTION = {
         2021: 1621211000 / 1000,
         2022: 1514132000 / 1000,
         2023: 1511971000 / 1000,
+        2024: 1387575500 / 1000,
     },
 }
 
