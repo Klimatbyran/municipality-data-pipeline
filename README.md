@@ -8,7 +8,7 @@ Run `pip install -r requirements.txt` to install the required dependencies. If y
 
 ### Example calculation
 
-A Google Doc with example calculations for the emissions in Skövde municipality can be found [here](https://docs.google.com/document/d/1MihysUkfunbV0LjwSUCiGSqWQSo5U03K0RMbRsVBL7U/edit#heading=h.oqnz3ereclbn). The calculations for each step are described in words (in Swedish) and, where possible, an explicit and simple calculation is presented. NOTE: The calculations are done for 2024 year's budget and the document is intended as method desciption for non-coders and people that are new to the source code. The document is open and editable and may therefore be updated over time.
+A Google Doc with example calculations for the emissions in Skövde municipality can be found [here](https://docs.google.com/document/d/1MihysUkfunbV0LjwSUCiGSqWQSo5U03K0RMbRsVBL7U/edit#heading=h.oqnz3ereclbn). The calculations for each step are described in words (in Swedish) and, where possible, an explicit and simple calculation is presented. NOTE: The document is intended as method desciption for non-coders and people that are new to the source code. The document is open and editable and may therefore be updated over time.
 
 ### Data Sources
 
@@ -24,6 +24,7 @@ This repository contains both the datasets we host and the Python scripts for ca
  - `climate_data_calculations.py`: Execute this Python script to run all the calculations and generate updated data.
 - `/output:` This is where the processed data gets saved.
     - `climate-data.json`: This JSON file serves as the core output, containing all the calculated climate data.
+    - `sector-emissions.json`: This JSON file contains sector emissions data for municipalities.
 - `/tests:` Unit tests for data calculations. To run all tests:
 
     ```
@@ -49,11 +50,16 @@ py.test tests --profile-svg && open prof/combined.svg
 
 ### How to Update Data on Site
 
-To recalculate and refresh the site's data, execute the following command:
+To recalculate and refresh the site's data, start by executing:
 
 `python3 climate_data_calculations.py`
 
-The results will be saved in the `/output` folder, primarily in the `climate-data.json` file. The climate data is sourced using a TypeScript utility service located at `utils/climateDataService.tsx`. This service is responsible for fetching and manipulating the data found in `climate-data.json` for use throughout the website. To add or edit the descriptions of datasets that appear in the national overview on the website's homepage, make the necessary changes in `utils/datasetDefinitions.tsx`.
+Then run:
+
+`python3 sector_emissions.py`
+
+The results will be saved in the `/output` folder, primarily in the `climate-data.json` and `sector-emissions.json` files respectively.
+
 
 #### Handling Data Inconsistencies for Municipalities
 
@@ -71,19 +77,18 @@ In the list, the term appearing before the colon (:) is the standardized name th
 
 ### Emission Calculations 
 
-The folder `/kpis/emissions` contains files with functions to perform calculations related to CO2 emissions for municipalities, based on SMHI emission data and a given total CO2 budget for Sweden. Each function serves a specific purpose such as preprocessing data, calculating municipality-specific budgets, future trends or when the budget for a municipality will run out. Their order of execution is specified in `/kpis/emissions/emission_data_calculations.py`.
+The folder `/kpis/emissions` contains files with functions to perform calculations related to CO2 emissions for municipalities, based on SMHI emission data and Carbon Law. Each function serves a specific purpose such as preprocessing data or future trends. Their order of execution is specified in `/kpis/emissions/emission_data_calculations.py`.
 
 #### Constants 
 
-The most important constants in the module are `NATIONAL_BUDGET_15`, `NATIONAL_BUDGET_17`, `NATIONAL_OVERHEAD_17`, `BUDGET_YEAR`, `CEMENT_DEDUCTION`, `LAST_YEAR_WITH_SMHI_DATA` and `CURRENT_YEAR` as they determine the baseline and scope of the calculations.
+There are a few important constants that determine the source, baseline and scope of the calculations.
 
-* `NATIONAL_BUDGET_15`: Represents the total CO2 budget for a 50% chance of staying below 1.5 degrees, in metric tonnes.
-* `NATIONAL_BUDGET_17`: Represents the total CO2 budget for a 50% chance of staying below 1.7 degrees, in metric tonnes.
-* `NATIONAL_OVERHEAD_17`: Reprensents the total national overhead for `NATIONAL_BUDGET_17`, in metric tonnes.
-* `BUDGET_YEAR`: Represents the year from which the CO2 budget applies.
-* `CEMENT_DEDUCTION`: Represents the total CO2 emissions from cement production in municipalities with cement plants that were operational in 2015 or later.
-* `LAST_YEAR_WITH_SMHI_DATA`: Represents the last year for which the [National Emission database](https://nationellaemissionsdatabasen.smhi.se/) has data.
-* `CURRENT_YEAR`: Represents the year which is to be handled as current year.
+* `PATH_SMHI`: API URL to the SMHI emissions data from the [National Emission Database](https://nationellaemissionsdatabasen.smhi.se/). Currently set to download data for all municipalities and counties with GGT (Greenhouse Gas Total) emissions.
+* `CARBON_LAW_REDUCTION_RATE`: SAnnual reduction rate mandated by the Carbon Law, currently set to 11.72% per year (0.1172 as decimal) as of 2025.
+* `CEMENT_DEDUCTION`: Dictionary containing annual CO2 emissions data from cement production that should be deducted from total emissions for municipalities with cement plants (Mörbylånga, Skövde, and Gotland). Values are in tonnes CO2.
+* `LAST_YEAR_WITH_SMHI_DATA`: The last year for which verified emissions data is available from SMHI's National Emission Database.
+* `CURRENT_YEAR`: The year to be treated as the current year for calculations and projections (currently 2025).
+* `END_YEAR`: The final year for emission projections and Carbon Law calculations (currently 2050).
 
 #### Functions
 
@@ -99,21 +104,9 @@ Here's a summary of what the functions do, in order of execution in `/kpis/emiss
 
 5. `calculate_trend`: Calculates trend line for future years up to 2050. This is done by interpolation using previously calculated linear trend coefficients
 
-6. `calculate_n_subtract_national_overheads`: Calculates the national overhead for a CO2 budget for `NATIONAL_BUDGET_15`, based on `NATIONAL_BUDGET_17` and `NATIONAL_OVERHEAD_17`. This is achieved by determining the proportion of the national overhead within the total budget and then calculating corresponding value for `NATIONAL_BUDGET_15`. All values are in metric tonnes.
+6. `calculate_historical_change_percent`: Calculates the average historical yearly emission change in percent based on SMHI data from 2015 onwards.
 
-7. `calculate_municipality_budgets`: Calculates municipality specific CO2 budgets by deriving budget shares from the SMHI data for each municipality (using grand fathering) and multiplying them with the given total CO2 budget.
-
-8. `calculate_paris_path`: Calculates an exponential curve satisfying each municipality's CO2 budget (Paris Agreement path), starting from the year the budget kicks in.
-
-9. `calculate_historical_change_percent`: Calculates the average historical yearly emission change in percent based on SMHI data from 2015 onwards.
-
-10. `calculate_needed_change_percent`: Calculates the yearly decrease in percent needed to reach the Paris Agreement goal.
-
-11. `calculate_hit_net_zero`: Calculates the date and year for when each municipality hits net zero emissions (if so). This, by deriving where the trend line crosses the time axis.
-
-12. `calculate_budget_runs_out`: Calculates the year and date for when the CO2 budget runs out for each municipality (if so). This, by integrating the trend line over the time it takes for the budget to be consumed and see where we are at the time axis by that point.
-
-13. `emission_calculations`: Orchestrates the execution of the above methods in sequence to perform all emission calculations for municipalities.
+7. `calculate_carbon_law_total`: Calculates total emissions from carbon law reduction path for municipalities.
 
 ## Contributing
 
