@@ -8,7 +8,7 @@ Run `pip install -r requirements.txt` to install the required dependencies. If y
 
 ### Example calculation
 
-A Google Doc with example calculations for the emissions in Skövde municipality can be found [here](https://docs.google.com/document/d/1MihysUkfunbV0LjwSUCiGSqWQSo5U03K0RMbRsVBL7U/edit#heading=h.oqnz3ereclbn). The calculations for each step are described in words (in Swedish) and, where possible, an explicit and simple calculation is presented. NOTE: The calculations are done for 2024 year's budget and the document is intended as method desciption for non-coders and people that are new to the source code. The document is open and editable and may therefore be updated over time.
+A Google Doc with example calculations for the emissions in Skövde municipality can be found [here](https://docs.google.com/document/d/1MihysUkfunbV0LjwSUCiGSqWQSo5U03K0RMbRsVBL7U/edit#heading=h.oqnz3ereclbn). The calculations for each step are described in words (in Swedish) and, where possible, an explicit and simple calculation is presented. NOTE: The document is intended as method desciption for non-coders and people that are new to the source code. The document is open and editable and may therefore be updated over time.
 
 ### Data Sources
 
@@ -24,6 +24,7 @@ This repository contains both the datasets we host and the Python scripts for ca
  - `climate_data_calculations.py`: Execute this Python script to run all the calculations and generate updated data.
 - `/output:` This is where the processed data gets saved.
     - `climate-data.json`: This JSON file serves as the core output, containing all the calculated climate data.
+    - `sector-emissions.json`: This JSON file contains sector emissions data for municipalities.
 - `/tests:` Unit tests for data calculations. To run all tests:
 
     ```
@@ -49,11 +50,16 @@ py.test tests --profile-svg && open prof/combined.svg
 
 ### How to Update Data on Site
 
-To recalculate and refresh the site's data, execute the following command:
+To recalculate and refresh the site's data, start by executing:
 
 `python3 climate_data_calculations.py`
 
-The results will be saved in the `/output` folder, primarily in the `climate-data.json` file.
+Then run:
+
+`python3 sector_emissions.py`
+
+The results will be saved in the `/output` folder, primarily in the `climate-data.json` and `sector-emissions.json` files respectively.
+
 
 #### Handling Data Inconsistencies for Municipalities
 
@@ -75,11 +81,14 @@ The folder `/kpis/emissions` contains files with functions to perform calculatio
 
 #### Constants 
 
-The most important constants in the module are `CEMENT_DEDUCTION`, `LAST_YEAR_WITH_SMHI_DATA` and `CURRENT_YEAR` as they determine the baseline and scope of the calculations.
+There are a few important constants that determine the source, baseline and scope of the calculations.
 
-* `CEMENT_DEDUCTION`: Represents the total CO2 emissions from cement production in municipalities with cement plants that were operational in 2015 or later.
-* `LAST_YEAR_WITH_SMHI_DATA`: Represents the last year for which the [National Emission database](https://nationellaemissionsdatabasen.smhi.se/) has data.
-* `CURRENT_YEAR`: Represents the year which is to be handled as current year.
+* `PATH_SMHI`: API URL to the SMHI emissions data from the [National Emission Database](https://nationellaemissionsdatabasen.smhi.se/). Currently set to download data for all municipalities and counties with GGT (Greenhouse Gas Total) emissions.
+* `CARBON_LAW_REDUCTION_RATE`: SAnnual reduction rate mandated by the Carbon Law, currently set to 11.72% per year (0.1172 as decimal) as of 2025.
+* `CEMENT_DEDUCTION`: Dictionary containing annual CO2 emissions data from cement production that should be deducted from total emissions for municipalities with cement plants (Mörbylånga, Skövde, and Gotland). Values are in tonnes CO2.
+* `LAST_YEAR_WITH_SMHI_DATA`: The last year for which verified emissions data is available from SMHI's National Emission Database.
+* `CURRENT_YEAR`: The year to be treated as the current year for calculations and projections (currently 2025).
+* `END_YEAR`: The final year for emission projections and Carbon Law calculations (currently 2050).
 
 #### Functions
 
