@@ -19,12 +19,12 @@ def get_smhi_data(path=PATH_SMHI):
     """
 
     df_raw = pd.read_excel(path, engine="openpyxl")
-
+    #
     # Remove the first 4 rows and reset the index
-    df_raw = df_raw.drop([0, 1, 2]).reset_index(drop=True)
+    df_raw = df_raw.drop(range(4)).reset_index(drop=True)
 
     # Put the first 4 elements in row 1 in to row 0
-    df_raw.iloc[0, [0, 1, 2, 3]] = df_raw.iloc[1, [0, 1, 2, 3]]
+    df_raw.iloc[0, range(4)] = df_raw.iloc[1, range(4)]
 
     df_raw = df_raw.drop([1]).reset_index(drop=True)  # remove row 1 and reset the index
 

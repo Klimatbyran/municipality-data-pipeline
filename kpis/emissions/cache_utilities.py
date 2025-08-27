@@ -1,3 +1,4 @@
+from typing import Callable, Optional
 import hashlib
 import os
 import pyarrow.feather as feather
@@ -5,14 +6,17 @@ import pyarrow.feather as feather
 import pandas as pd
 
 
-def cache_df(f: type(pd.read_excel) = None, path: str = '', freq: str = '1Y') -> type(pd.read_excel):
+def cache_df(
+    func: Optional[Callable[..., pd.DataFrame]] = None, path: str = "", freq: str = "1Y"
+) -> Callable[..., pd.DataFrame]:
     """
     Cache the DataFrame to an intermediate file and use it if created within the same period.
 
     Args:
         f: A function to cache (e.g., a function that loads a DataFrame).
         path: Path to the file to be cached. If provided without f, acts as a decorator.
-        freq: Cache period, e.g. '1D', '1M', '1Y'. Defaults to '1Y'. If provided without f, acts as a decorator.
+        freq: Cache period, e.g. '1D', '1M', '1Y'. Defaults to '1Y'.
+              If provided without f, acts as a decorator.
 
     Returns:
         Caching of the output - not calling the function unless we entered a new period.
@@ -66,40 +70,43 @@ def cache_df(f: type(pd.read_excel) = None, path: str = '', freq: str = '1Y') ->
         >>> os.remove(f"cache_df_load_data_short_expiry_{file_hash}.feather")
         >>> os.remove(f"cache_df_load_data_short_expiry_{file_hash}.pkl")
     """
-    if f is None:
+    if func is None:
         return lambda f: cache_df(f, path=path, freq=freq)
 
     def caching_f(*args, **kwargs):
-        input_path = kwargs.get('path') or (args[0] if args else path)
+        input_path = kwargs.get("path") or (args[0] if args else path)
 
         # Create a hash of the path for the cache file
         path_hash = hashlib.md5(input_path.encode()).hexdigest()
-        df_file = f'cache_df_{f.__name__}_{path_hash}.feather'
-        columns_file = f'cache_df_{f.__name__}_{path_hash}.pkl'
+        df_file = f"cache_df_{func.__name__}_{path_hash}.feather"
+        columns_file = f"cache_df_{func.__name__}_{path_hash}.pkl"
 
         # Check if cached file and columns file exist and is in the same period as now
         if os.path.exists(df_file):
             stat = os.stat(df_file)
-            cache_mtime = pd.Timestamp(stat.st_mtime_ns // 1_000_000, unit='ms')
-            if pd.Period(pd.Timestamp.now(), freq=freq) == pd.Period(cache_mtime, freq=freq):
+            cache_mtime = pd.Timestamp(stat.st_mtime_ns // 1_000_000, unit="ms")
+            if pd.Period(pd.Timestamp.now(), freq=freq) == pd.Period(
+                cache_mtime, freq=freq
+            ):
                 # Load cached data
-                df = pd.read_feather(df_file)
+                cached_df = pd.read_feather(df_file)
                 # Load original column names
                 if os.path.exists(columns_file):
                     original_columns = pd.read_pickle(columns_file)
-                    df.columns = original_columns
-                return df
+                    cached_df.columns = original_columns
+                return cached_df
 
         # Process and cache the data
-        df = f(*args, **kwargs)
-        feather.write_feather(df, df_file)
+        cached_df = func(*args, **kwargs)
+        cached_df.to_feather(df_file)
 
-        # Save the original column names separately since feather does not support different heading types
-        pd.to_pickle(df.columns, columns_file)
+        # Save the original column names separately
+        # since feather does not support different heading types
+        pd.to_pickle(cached_df.columns, columns_file)
 
-        return df
+        return cached_df
 
-    caching_f.__name__ = 'cache_df_' + f.__name__
+    caching_f.__name__ = "cache_df_" + func.__name__
     return caching_f
 
 

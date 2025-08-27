@@ -5,15 +5,20 @@ import pandas as pd
 from kpis.emissions.historical_data_calculations import get_smhi_data
 from kpis.emissions.historical_data_calculations import get_n_prep_data_from_smhi
 
+
 LAST_YEAR_WITH_SMHI_DATA = 2023
 CURRENT_YEAR = 2025
 NATIONAL_BUDGET = 80e6
 BUDGET_YEAR = 2024
 
-PATH_SMHI = "https://nationellaemissionsdatabasen.smhi.se/api/getexcelfile/?county=0&municipality=0&sub=GGT"
+PATH_SMHI = (
+    "https://nationellaemissionsdatabasen.smhi.se/api"
+    + "/getexcelfile/?county=0&municipality=0&sub=GGT"
+)
 
 
 class TestEmissionData(unittest.TestCase):
+    """Test fetching and prepping of emission data, as well as catching of new entries by SMHI"""
 
     def test_get_smhi_data(self):
         """Test that the SMHI data has the correct values.
@@ -21,8 +26,7 @@ class TestEmissionData(unittest.TestCase):
         Reason for test was issues with incorrect data being provided by SMHI"""
         df_full_dataset = get_smhi_data(PATH_SMHI)
 
-        # Filter for municipalities Ale and Skövde,
-        # where Huvudsektor is Alla and years 2022 and 2023
+        # Filter for municipalities Ale and Skövde where Huvudsektor is Alla and years 2022 and 2023
         # Also reset index
         df_result = df_full_dataset[
             (df_full_dataset["Kommun"].isin(["Ale", "Skövde"]))
@@ -46,6 +50,7 @@ class TestEmissionData(unittest.TestCase):
 
         df_input = pd.DataFrame(pd.read_excel(path_input_df))
         df_result = get_n_prep_data_from_smhi(df_input)
+
         # Only check for numerical columns since that will tell if the data
         # has been updated with an entry for a new year
         result_columns = [col for col in df_result.columns if str(col).isdigit()]
