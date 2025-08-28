@@ -147,7 +147,7 @@ def emission_calculations(df):
 
     df_cem = deduct_cement(df_smhi, CEMENT_DEDUCTION)
 
-    df_trend_and_approximated = calculate_trend(df_cem, CURRENT_YEAR)
+    df_trend_and_approximated = calculate_trend(df_cem, CURRENT_YEAR, END_YEAR)
 
     df_historical_change_percent = calculate_historical_change_percent(
         df_trend_and_approximated, LAST_YEAR_WITH_SMHI_DATA
