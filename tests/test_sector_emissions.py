@@ -5,12 +5,10 @@ from unittest.mock import patch
 import pandas as pd
 from sector_emissions import (
     create_sector_emissions_dict,
+    extract_sector_data,
     generate_sector_emissions_file,
 )
-from kpis.emissions.historical_data_calculations import (
-    get_smhi_data,
-    extract_sector_data,
-)
+from kpis.emissions.historical_data_calculations import get_smhi_data
 
 
 class TestSectorEmissions(unittest.TestCase):
