@@ -46,7 +46,7 @@ class TestTrendCalculations(unittest.TestCase):
             f"Missing trend columns: {set(expected_trend) - set(df_result.columns)}",
         )
 
-        # self.assertEqual(df_result.iloc[0]["trend_2033"], 282.86)
+        self.assertEqual(df_result.iloc[0]["trend_2033"], 282.86)
 
     def test_calculate_approximated_historical(self):
         """Test the LAD anchored regression for approximated historical emissions"""
@@ -66,8 +66,8 @@ class TestTrendCalculations(unittest.TestCase):
             f"Missing approximated columns: {set(expected_approximated) - set(df_result.columns)}",
         )
 
-        # self.assertEqual(df_result.iloc[0]["approximated_2025"], 180)
-        # self.assertEqual(df_result.iloc[0]["approximated_2029"], 282.86)
+        self.assertEqual(df_result.iloc[0]["approximated_2025"], 180)
+        self.assertEqual(df_result.iloc[0]["approximated_2029"], 282.86)
 
 
 if __name__ == "__main__":
