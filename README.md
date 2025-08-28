@@ -98,7 +98,7 @@ Here's a summary of what the functions do, in order of execution in `/kpis/emiss
 
 2. `deduct_cement`: Deducts cement emissions from specified municipalities.
 
-3. `calculate_trend_coefficients`: Calculates linear trend coefficients for each municipailty based on SMHI data from 2015 onwards. This is done by fitting a straight line to the data using least square fit.
+3. `calculate_trend`: Calculates linear trend coefficients and future values for each municipailty based on SMHI data from 2015 onwards. This is done by fitting a straight line to the data using least absolute deviations (LAD).
 
 4. `calculate_approximated_historical`: Calculates approximated historical data values for years passed since the last year with SMHI data. This is done by interpolation using previously calculated linear trend coefficients.
 

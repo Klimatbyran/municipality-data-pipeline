@@ -3,14 +3,8 @@
 
 import numpy as np
 
-from kpis.emissions.approximated_data_calculations import (
-    calculate_approximated_historical,
-)
 from kpis.emissions.historical_data_calculations import get_n_prep_data_from_smhi
-from kpis.emissions.trend_calculations import (
-    calculate_trend_coefficients,
-    calculate_trend,
-)
+from kpis.emissions.trend_calculations import calculate_trend
 from kpis.emissions.carbon_law_calculations import calculate_carbon_law_total
 
 
@@ -146,34 +140,22 @@ def emission_calculations(df):
     - df (pandas.DataFrame): The input dataframe containing municipality data.
 
     Returns:
-    - df_budget_runs_out (pandas.DataFrame): The resulting dataframe with emissions data.
+    - (pandas.DataFrame): The resulting dataframe with emissions data.
     """
 
     df_smhi = get_n_prep_data_from_smhi(df)
 
     df_cem = deduct_cement(df_smhi, CEMENT_DEDUCTION)
 
-    df_trend_coefficients = calculate_trend_coefficients(
-        df_cem, LAST_YEAR_WITH_SMHI_DATA
-    )
-
-    df_approxmimated_historical_total = calculate_approximated_historical(
-        df_trend_coefficients, LAST_YEAR_WITH_SMHI_DATA, CURRENT_YEAR
-    )
-
-    df_trend = calculate_trend(
-        df_approxmimated_historical_total, LAST_YEAR_WITH_SMHI_DATA, CURRENT_YEAR
-    )
+    df_trend_and_approximated = calculate_trend(df_cem, CURRENT_YEAR, END_YEAR)
 
     df_historical_change_percent = calculate_historical_change_percent(
-        df_trend, LAST_YEAR_WITH_SMHI_DATA
+        df_trend_and_approximated, LAST_YEAR_WITH_SMHI_DATA
     )
 
-    df_carbon_law = calculate_carbon_law_total(
+    return calculate_carbon_law_total(
         df_historical_change_percent,
         CURRENT_YEAR,
         END_YEAR,
         CARBON_LAW_REDUCTION_RATE,
     )
-
-    return df_carbon_law
