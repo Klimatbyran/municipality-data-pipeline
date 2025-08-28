@@ -191,6 +191,4 @@ def calculate_trend(input_df, current_year, end_year):
     # Create new columns DataFrame and concatenate with original
     new_columns_df = pd.DataFrame(new_columns_data)
 
-    print(pd.concat([input_df, new_columns_df], axis=1).head())
-    print(pd.concat([input_df, new_columns_df], axis=1).columns)
     return pd.concat([input_df, new_columns_df], axis=1)
