@@ -45,7 +45,7 @@ def generate_prediction_years(last_data_year, current_year, end_year):
     years_approximated = np.arange(last_data_year, current_year + 1, dtype=float)
 
     # Generate years for trend (from current year onwards to end year)
-    years_trend = np.arange(current_year, current_year + end_year, dtype=float)
+    years_trend = np.arange(current_year, end_year, dtype=float)
 
     return years_approximated, years_trend
 
