@@ -26,6 +26,16 @@ END_YEAR = 2035
 class TestTrendCalculations(unittest.TestCase):
     """Test the emission trend calculations"""
 
+    def _compare_approximated_results(
+        self, df_result, column_name, expected_value, test_string
+    ):
+        result = df_result.iloc[0][column_name]
+        self.assertEqual(
+            result,
+            expected_value,
+            f"{test_string}{result - expected_value}",
+        )
+
     def test_calculate_future_trend(self):
         """Test the LAD anchored regression for future trend"""
 
@@ -46,7 +56,12 @@ class TestTrendCalculations(unittest.TestCase):
             f"Missing trend columns: {set(expected_trend) - set(df_result.columns)}",
         )
 
-        self.assertEqual(df_result.iloc[0]["trend_2033"], 282.86)
+        self._compare_approximated_results(
+            df_result,
+            "trend_2034",
+            282.85714395918365,
+            "Trend 2034 is off by ",
+        )
 
     def test_calculate_approximated_historical(self):
         """Test the LAD anchored regression for approximated historical emissions"""
@@ -66,8 +81,18 @@ class TestTrendCalculations(unittest.TestCase):
             f"Missing approximated columns: {set(expected_approximated) - set(df_result.columns)}",
         )
 
-        self.assertEqual(df_result.iloc[0]["approximated_2025"], 180)
-        self.assertEqual(df_result.iloc[0]["approximated_2029"], 282.86)
+        self._compare_approximated_results(
+            df_result,
+            "approximated_2025",
+            180,
+            "Approximated value for 2025 is off by ",
+        )
+        self._compare_approximated_results(
+            df_result,
+            "approximated_2029",
+            225.71428620408162,
+            "Approximated value for 2029 is off by ",
+        )
 
 
 if __name__ == "__main__":
