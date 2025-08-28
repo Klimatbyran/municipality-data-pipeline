@@ -70,20 +70,18 @@ def calculate_trend(input_df, current_year):
         intercept_at_last = res.predict([1.0, 0.0])[0]  # x=0 == last year
         shift = emissions_sorted[-1] - intercept_at_last
 
-        # Create dictionary for approximated historical data
-        approximated_dict = {}
+        # Create columns for approximated historical data
         for i, year in enumerate(years_approximated):
-            approximated_dict[int(year)] = preds_approximated[i] + shift
+            column_name = f"approximated_{int(year)}"
+            input_df.at[idx, column_name] = preds_approximated[i] + shift
 
-        # Create dictionary for trend data
-        trend_dict = {}
+        # Create columns for trend data
         for i, year in enumerate(years_trend):
-            trend_dict[int(year)] = preds_trend[i] + shift
+            column_name = f"trend_{int(year)}"
+            input_df.at[idx, column_name] = preds_trend[i] + shift
 
         # Store results in the dataframe
         input_df.at[idx, "trend_coefficient"] = res.params[1]
-        input_df.at[idx, "approximatedHistorical"] = approximated_dict
-        input_df.at[idx, "trend"] = trend_dict
 
         print(input_df.head())
 
