@@ -140,7 +140,7 @@ def emission_calculations(df):
     - df (pandas.DataFrame): The input dataframe containing municipality data.
 
     Returns:
-    - df_budget_runs_out (pandas.DataFrame): The resulting dataframe with emissions data.
+    - (pandas.DataFrame): The resulting dataframe with emissions data.
     """
 
     df_smhi = get_n_prep_data_from_smhi(df)

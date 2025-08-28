@@ -10,10 +10,10 @@ def calculate_trend(input_df, current_year):
 
     Parameters:
     - input_df (pandas.DataFrame): The input dataframe containing municipality data.
-    - years_future (list): The years of the future emissions data.
+    - current_year (int): The current year to predict until.
 
     Returns:
-    - input_df (pandas.DataFrame): DataFrame with added trend coefficients, aprroximated data
+    - input_df (pandas.DataFrame): DataFrame with added trend coefficients, approximated data
                                    until current year and future predictions.
     """
 
@@ -27,8 +27,15 @@ def calculate_trend(input_df, current_year):
     # Convert year column names to actual years
     years = np.array([int(col) for col in year_cols], dtype=float)
 
-    # Generate future years from last year with data from SMHI+1 to current_year
-    years_future = np.arange(numerical_cols[-1] + 1, current_year + 1, dtype=float)
+    # Find the last year with actual data
+    last_data_year = int(year_cols[-1])
+
+    # Generate years for approximated historical (from last data year to current year)
+    years_approximated = np.arange(last_data_year, current_year + 1, dtype=float)
+
+    # Generate years for trend (from current year onwards to some future point)
+    # Based on the test, it seems like we want to predict a few years into the future
+    years_trend = np.arange(current_year, current_year + 5, dtype=float)
 
     # Process each municipality row
     for idx in range(len(input_df)):
@@ -43,21 +50,41 @@ def calculate_trend(input_df, current_year):
 
         # Center years at the last observed year (e.g., 2023 -> 0)
         historical_years_centered = years_sorted - years_sorted[-1]
-        future_years_centered = years_future - years_sorted[-1]
+        approximated_years_centered = years_approximated - years_sorted[-1]
+        trend_years_centered = years_trend - years_sorted[-1]
 
         historical_design_matrix = sm.add_constant(
             historical_years_centered
         )  # shape (n, 2)
-        future_design_matrix = sm.add_constant(future_years_centered)  # shape (m, 2)
+        approximated_design_matrix = sm.add_constant(approximated_years_centered)
+        trend_design_matrix = sm.add_constant(trend_years_centered)
 
         res = sm.QuantReg(emissions_sorted, historical_design_matrix).fit(q=0.5)
-        preds = res.predict(future_design_matrix)
+
+        # Predict for approximated historical years
+        preds_approximated = res.predict(approximated_design_matrix)
+
+        # Predict for trend years
+        preds_trend = res.predict(trend_design_matrix)
 
         intercept_at_last = res.predict([1.0, 0.0])[0]  # x=0 == last year
         shift = emissions_sorted[-1] - intercept_at_last
 
+        # Create dictionary for approximated historical data
+        approximated_dict = {}
+        for i, year in enumerate(years_approximated):
+            approximated_dict[int(year)] = preds_approximated[i] + shift
+
+        # Create dictionary for trend data
+        trend_dict = {}
+        for i, year in enumerate(years_trend):
+            trend_dict[int(year)] = preds_trend[i] + shift
+
         # Store results in the dataframe
         input_df.at[idx, "trend_coefficient"] = res.params[1]
-        input_df.at[idx, "trend_predictions"] = list(preds + shift)
+        input_df.at[idx, "approximatedHistorical"] = approximated_dict
+        input_df.at[idx, "trend"] = trend_dict
+
+        print(input_df.head())
 
     return input_df

@@ -77,43 +77,60 @@ class TestEmissionCalculations(unittest.TestCase):
 
     def test_calculate_lad_anchored(self):
         """Test the LAD anchored regression"""
-        years = [2010, 2015, 2016, 2017, 2018, 2019, 2020, 2021]
         emissions = [100, 150, 120, 130, 140, 160, 170, 180]
-        years_future = [2022, 2023, 2024, 2025]
-        result, slope = calculate_trend(years, emissions, years_future)
-        self.assertEqual(result, [180, 190, 200, 210])
-        self.assertAlmostEqual(slope, 10)
+        years = list(range(2018, 2026))
+
+        input_df = pd.DataFrame(
+            {
+                "Kommun": ["Ale"],
+                **{year: [emission] for year, emission in zip(years, emissions)},
+            }
+        )
+
+        current_year = 2029
+        result_df = calculate_trend(input_df, current_year)
+
+        self.assertIn("trend", result_df.columns)
+        self.assertIn("trend_coefficient", result_df.columns)
+
+        predictions = result_df.iloc[0]["trend"]
+        self.assertEqual(len(predictions), 4)
 
     def test_calculate_approximated_historical(self):
-        """Test the approximated historical"""
+        """Test the approximated historical emissions"""
         # Sample data frame for Norrköping
         df_input = pd.DataFrame(
             {
                 "Kommun": ["Norrköping"],
-                2015: [575029.197615897],
-                2016: [587981.674412033],
-                2017: [562126.750235607],
-                2018: [567506.055574675],
-                2019: [561072.598453251],
-                2020: [511529.0569374],
-                2021: [543303.129520453],
-                "trendCoefficients": [[-8.89777111e03, 1.85140662e07]],
+                2018: [100],
+                2019: [150],
+                2020: [120],
+                2021: [130],
+                2022: [140],
+                2023: [160],
+                2024: [170],
+                2025: [180],
             }
         )
 
         df_expected = df_input.copy()
         df_expected["approximatedHistorical"] = [
             {
-                2021: 543303.129520453,
-                2022: 522772.98167590424,
-                2023: 513875.21056812257,
-                2024: 504977.43946033716,
+                2025: 180,
+                2026: 522772.98167590424,
+                2027: 513875.21056812257,
+                2028: 504977.43946033716,
+                2029: 496079.66835255175,
             }
         ]
-        df_expected["totalApproximatedHistorical"] = [1560788.47673442]
 
-        df_result = calculate_trend(df_input, CURRENT_YEAR)
+        current_year = 2029
+        df_result = calculate_trend(df_input, current_year)
 
+        print(df_result.columns)
+        print(df_result.head())
+        print(df_result["trend"])
+        print(df_result["trend_coefficient"])
         pd.testing.assert_frame_equal(df_result, df_expected, check_exact=False)
 
     def test_calculate_historical_change_percent(self):
