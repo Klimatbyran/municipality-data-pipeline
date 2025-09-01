@@ -151,6 +151,22 @@ def process_municipality_data(
         new_columns_data["trend_coefficient"][idx] = trend_coefficient
 
 
+def calculate_total_trend(input_df, current_year, end_year):
+    """
+    Calculate the total trend for the input dataframe.
+
+    Parameters:
+    - input_df (pandas.DataFrame): The input dataframe containing municipality data.
+    - current_year (int): The current year to predict until.
+    - end_year (int): The year to predict until.
+
+    Returns:
+    - input_df (pandas.DataFrame): DataFrame with added total trend.
+    """
+
+    return input_df["totalTrend"]
+
+
 def calculate_trend(input_df, current_year, end_year):
     """
     LAD (median/quantile) regression, with years centered at the last

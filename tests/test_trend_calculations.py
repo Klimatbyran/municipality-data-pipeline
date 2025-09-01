@@ -2,7 +2,7 @@
 import unittest
 import pandas as pd
 
-from kpis.emissions.trend_calculations import calculate_trend
+from kpis.emissions.trend_calculations import calculate_total_trend, calculate_trend
 
 # Sample data frame for Norrköping
 DF_INPUT = pd.DataFrame(
@@ -93,6 +93,13 @@ class TestTrendCalculations(unittest.TestCase):
             225.71428620408162,
             "Approximated value for 2029 is off by ",
         )
+
+    def test_total_trend(self):
+        """Test the total trend"""
+
+        df_result = calculate_total_trend(DF_INPUT, CURRENT_YEAR, END_YEAR)
+
+        self.assertEqual(df_result["totalTrend"], 1.0)
 
 
 if __name__ == "__main__":
