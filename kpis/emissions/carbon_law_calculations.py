@@ -1,4 +1,7 @@
 # Carbon Law reduction rate: 11.72% per year
+import pandas as pd
+
+
 CARBON_LAW_REDUCTION_RATE = 0.1172
 # This means each year should be (1 - 0.1172) = 0.8828 of the previous year
 CARBON_LAW_ANNUAL_FACTOR = 1 - CARBON_LAW_REDUCTION_RATE
@@ -16,15 +19,12 @@ def get_latest_emission_value(df_row, current_year):
     Returns:
         float: The latest emission value for the municipality
     """
-    # If there is approximated historical data for the current year, use that
-    if (
-        "approximatedHistorical" in df_row
-        and df_row["approximatedHistorical"]
-        and current_year in df_row["approximatedHistorical"]
-    ):
-        return df_row["approximatedHistorical"][current_year]
+    # Check if there's an approximated column for the current year
+    approximated_column = f"approximated_{current_year}"
+    if approximated_column in df_row and pd.notna(df_row[approximated_column]):
+        return df_row[approximated_column]
 
-    # Otherwise, use the latest SMHI data
+    # Otherwise, assume that the current year column exists
     return df_row[current_year]
 
 
