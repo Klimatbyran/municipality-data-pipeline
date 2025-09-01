@@ -7,16 +7,16 @@ from typing import Any, Dict, List
 import numpy as np
 import pandas as pd
 
-from kpis.cars.ev_change_rate import get_ev_change_rate
+from facts.municipalities_counties import get_municipalities
+from kpis.bicycles.bicycle_data_calculations import calculate_bike_lane_per_capita
 from kpis.cars.electric_vehicle_per_charge_points import (
     get_electric_vehicle_per_charge_points,
 )
-from kpis.bicycles.bicycle_data_calculations import calculate_bike_lane_per_capita
-from kpis.plans.plans_data_prep import get_climate_plans
-from facts.municipalities_counties import get_municipalities
-from kpis.procurements.climate_requirements_in_procurements import get_procurement_data
-from kpis.emissions.emission_data_calculations import emission_calculations
+from kpis.cars.ev_change_rate import get_ev_change_rate
 from kpis.consumption.consumption_emissions import get_consumption_emissions
+from kpis.emissions.emission_data_calculations import emission_calculations
+from kpis.plans.plans_data_prep import get_climate_plans
+from kpis.procurements.climate_requirements_in_procurements import get_procurement_data
 
 # Notebook from ClimateView that our calculations are based on:
 # https://colab.research.google.com/drive/1qqMbdBTu5ulAPUe-0CRBmFuh8aNOiHEb?usp=sharing
@@ -64,7 +64,12 @@ def create_dataframe(to_percentage: bool) -> pd.DataFrame:
     return result_df.sort_values(by="Kommun").reset_index(drop=True)
 
 
-def series_to_dict(row: pd.Series, numeric_columns: List[Any]) -> Dict:
+def series_to_dict(
+    row: pd.Series,
+    historical_columns: List[Any],
+    approximated_columns: List[Any],
+    trend_columns: List[Any],
+) -> Dict:
     """
     Transforms a pandas Series into a dictionary.
 
@@ -78,12 +83,12 @@ def series_to_dict(row: pd.Series, numeric_columns: List[Any]) -> Dict:
     return {
         "name": row["Kommun"],
         "region": row["Län"],
-        "emissions": {str(year): row[year] for year in numeric_columns},
+        "emissions": {str(year): row[year] for year in historical_columns},
         "budget": row["totalCarbonLawPath"],
-        "approximatedHistoricalEmission": row["approximatedHistorical"],
-        "totalApproximatedHistoricalEmission": row["totalApproximatedHistorical"],
-        "trend": row["trend"],
-        "trendEmission": row["trendEmission"],
+        "approximatedHistoricalEmission": {
+            str(year): row[year] for year in approximated_columns
+        },
+        "trend": {str(year): row[year] for year in trend_columns},
         "historicalEmissionChangePercent": row["historicalEmissionChangePercent"],
         "electricCarChangePercent": row["evChangeRate"],
         "electricCarChangeYearly": row["evChangeYearly"],
@@ -115,15 +120,30 @@ def max_decimals(entry: Dict, num_decimals: int) -> Dict:
 
 def df_to_dict(input_df: pd.DataFrame, num_decimals: int) -> dict:
     """Convert dataframe to list of dictionaries with optional decimal rounding."""
-    numeric_columns = [col for col in input_df.columns if str(col).isdigit()]
+    historical_columns = [col for col in input_df.columns if str(col).isdigit()]
+    approximated_columns = [
+        col for col in input_df.columns if "approximated" in str(col)
+    ]
+    trend_columns = [col for col in input_df.columns if "trend" in str(col)]
 
     return [
         (
             max_decimals(
-                series_to_dict(input_df.iloc[i], numeric_columns), num_decimals
+                series_to_dict(
+                    input_df.iloc[i],
+                    historical_columns,
+                    approximated_columns,
+                    trend_columns,
+                ),
+                num_decimals,
             )
             if num_decimals >= 0
-            else series_to_dict(input_df.iloc[i], numeric_columns)
+            else series_to_dict(
+                input_df.iloc[i],
+                historical_columns,
+                approximated_columns,
+                trend_columns,
+            )
         )
         for i in range(len(input_df))
     ]
