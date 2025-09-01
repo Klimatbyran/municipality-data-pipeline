@@ -13,17 +13,15 @@ def extract_year_columns(input_df):
     Returns:
     - tuple: (year_cols, years, last_data_year)
     """
-    # Extract numerical columns from the dataframe
     numerical_cols = input_df.select_dtypes(include=[np.number]).columns
     year_cols = [
         col for col in numerical_cols if str(col).isdigit() and len(str(col)) == 4
     ]
     year_cols = sorted(year_cols)  # Sort years in ascending order
 
-    # Convert year column names to actual years
+    # Convert year column names to numerical years
     years = np.array([int(col) for col in year_cols], dtype=float)
 
-    # Find the last year with actual data
     last_data_year = int(year_cols[-1])
 
     return year_cols, years, last_data_year
@@ -41,12 +39,8 @@ def generate_prediction_years(last_data_year, current_year, end_year):
     Returns:
     - tuple: (years_approximated, years_trend)
     """
-    # Generate years for approximated historical (from last data year to current year)
     years_approximated = np.arange(last_data_year, current_year + 1, dtype=float)
-
-    # Generate years for trend (from current year onwards to end year)
     years_trend = np.arange(current_year, end_year, dtype=float)
-
     return years_approximated, years_trend
 
 
