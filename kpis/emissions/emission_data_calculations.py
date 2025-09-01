@@ -2,13 +2,14 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+from datetime import datetime
 
 from kpis.emissions.historical_data_calculations import get_n_prep_data_from_smhi
 from kpis.emissions.trend_calculations import calculate_trend
 from kpis.emissions.carbon_law_calculations import calculate_carbon_law_total
 
 
-CURRENT_YEAR = 2025  # current year
+CURRENT_YEAR = datetime.now().year  # current year
 LAST_YEAR_WITH_SMHI_DATA = (
     2023  # last year for which the National Emission database has data
 )

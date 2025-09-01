@@ -40,7 +40,7 @@ def generate_prediction_years(last_data_year, current_year, end_year):
     - tuple: (years_approximated, years_trend)
     """
     years_approximated = np.arange(last_data_year, current_year + 1, dtype=float)
-    years_trend = np.arange(current_year, end_year, dtype=float)
+    years_trend = np.arange(current_year, end_year + 1, dtype=float)
     return years_approximated, years_trend
 
 
