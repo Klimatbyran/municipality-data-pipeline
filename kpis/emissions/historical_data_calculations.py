@@ -2,10 +2,9 @@ import pandas as pd
 
 from kpis.emissions.cache_utilities import cache_df
 
-
 PATH_SMHI = (
-    "https://nationellaemissionsdatabasen.smhi.se/"
-    + "api/getexcelfile/?county=0&municipality=0&sub=GGT"
+    "https://nationellaemissionsdatabasen.smhi.se/api/"
+    + "getexcelfile/?county=0&municipality=0&sub=GGT"
 )
 
 
