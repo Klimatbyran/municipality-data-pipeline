@@ -19,8 +19,10 @@ def get_latest_emission_value(df_row, current_year):
     Returns:
         float: The latest emission value for the municipality
     """
+
     # Check if there's an approximated column for the current year
     approximated_column = f"approximated_{current_year}"
+
     if approximated_column in df_row and pd.notna(df_row[approximated_column]):
         return df_row[approximated_column]
 
