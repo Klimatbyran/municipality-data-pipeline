@@ -122,7 +122,9 @@ def process_municipality_data(
         order = np.argsort(years)
         years_sorted, emissions_sorted = years[order], emissions[order]
 
-        # Center years at the last observed year
+        # Center years at the last observed year to improve stability of following regression
+        # Regression models work better with smaller numbers closer to zero and
+        # all time series are aligned to the same reference point
         historical_years_centered = years_sorted - years_sorted[-1]
         approximated_years_centered = years_approximated - years_sorted[-1]
         trend_years_centered = years_trend - years_sorted[-1]
