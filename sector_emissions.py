@@ -84,6 +84,12 @@ def create_sector_emissions_dict(
             value = round(float(row[col]), num_decimals) if pd.notna(row[col]) else None
             municipality_data["sectors"][year][sector] = value
 
+        # Sort sectors alphabetically for each year
+        for year in municipality_data["sectors"]:
+            municipality_data["sectors"][year] = dict(
+                sorted(municipality_data["sectors"][year].items())
+            )
+
         result.append(municipality_data)
 
     return result
