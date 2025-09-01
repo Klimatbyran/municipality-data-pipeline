@@ -8,6 +8,7 @@ from kpis.emissions.carbon_law_calculations import (
     sum_carbon_law_total_future_emissions,
     calculate_carbon_law_total,
 )
+from kpis.emissions.trend_calculations import calculate_trend
 
 
 class TestCarbonLawCalculations(unittest.TestCase):
@@ -20,7 +21,11 @@ class TestCarbonLawCalculations(unittest.TestCase):
         approximated_data_row = {
             2019: 1,
             2020: 1,
-            "approximatedHistorical": {2020: 1, 2021: 2, 2022: 4, 2023: 3, 2024: 5},
+            "approximated_2020": 1,
+            "approximated_2021": 2,
+            "approximated_2022": 4,
+            "approximated_2023": 3,
+            "approximated_2024": 5,
         }
         latest_emission_value_result = get_latest_emission_value(
             approximated_data_row, 2024
@@ -92,11 +97,18 @@ class TestCarbonLawCalculations(unittest.TestCase):
                 "Kommun": ["Ale"],
                 2021: [1],
                 2022: [2],
-                "approximatedHistorical": [{2023: 4, 2024: 3, 2025: 5}],
             }
         )
 
-        df_result = calculate_carbon_law_total(input_df, 2025, 2040, 0.10)
+        current_year = 2025
+        end_year = 2040
+        reduction_rate = 0.10
+
+        df_trend = calculate_trend(input_df, current_year, end_year)
+
+        df_result = calculate_carbon_law_total(
+            df_trend, current_year, end_year, reduction_rate
+        )
 
         # Get the totalCarbonLawPath value for the row where Kommun equals "Ale"
         ale_result = df_result[df_result["Kommun"] == "Ale"]["totalCarbonLawPath"].iloc[
