@@ -122,9 +122,9 @@ def df_to_dict(input_df: pd.DataFrame, num_decimals: int) -> dict:
     """Convert dataframe to list of dictionaries with optional decimal rounding."""
     historical_columns = [col for col in input_df.columns if str(col).isdigit()]
     approximated_columns = [
-        col for col in input_df.columns if "approximated" in str(col)
+        col for col in input_df.columns if "approximated_" in str(col)
     ]
-    trend_columns = [col for col in input_df.columns if "trend" in str(col)]
+    trend_columns = [col for col in input_df.columns if "trend_" in str(col)]
 
     return [
         (
