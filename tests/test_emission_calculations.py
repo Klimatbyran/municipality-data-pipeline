@@ -6,7 +6,6 @@ from kpis.emissions.emission_data_calculations import (
     calculate_historical_change_percent,
     deduct_cement,
 )
-from kpis.emissions.trend_calculations import calculate_trend
 
 
 LAST_YEAR_WITH_SMHI_DATA = 2021
