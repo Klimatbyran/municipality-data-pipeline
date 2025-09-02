@@ -4,6 +4,7 @@
 import numpy as np
 from datetime import datetime
 
+from kpis.emissions.cement_deductions import CEMENT_DEDUCTION_VALUES
 from kpis.emissions.historical_data_calculations import get_n_prep_data_from_smhi
 from kpis.emissions.trend_calculations import calculate_trend
 from kpis.emissions.carbon_law_calculations import calculate_carbon_law_total
@@ -22,54 +23,8 @@ PATH_SMHI = (
     + "getexcelfile/?county=0&municipality=0&sub=GGT"
 )
 
-# ------- CEMENT CARBON EMISSIONS -------
 
-# Sources for cement deduction (use CO2 totalt)
-# Mörbylånga: https://utslappisiffror.naturvardsverket.se/sv/Sok/Anlaggningssida/?pid=1441
-# Skövde: https://utslappisiffror.naturvardsverket.se/sv/Sok/Anlaggningssida/?pid=5932
-# Gotland: https://utslappisiffror.naturvardsverket.se/sv/Sok/Anlaggningssida/?pid=834
-
-CEMENT_DEDUCTION = {
-    "Mörbylånga": {
-        2010: 248025000 / 1000,
-        2015: 255970000 / 1000,
-        2016: 239538000 / 1000,
-        2017: 255783000 / 1000,
-        2018: 241897000 / 1000,
-        2019: 65176000 / 1000,
-        2020: 0,
-        2021: 0,
-        2022: 0,
-        2023: 0,
-        2024: 0,
-    },
-    "Skövde": {
-        2010: 356965000 / 1000,
-        2015: 358634000 / 1000,
-        2016: 384926000 / 1000,
-        2017: 407633130 / 1000,
-        2018: 445630340 / 1000,
-        2019: 440504330 / 1000,
-        2020: 459092473 / 1000,
-        2021: 439174727 / 1000,
-        2022: 406856000 / 1000,
-        2023: 340611000 / 1000,
-        2024: 260927000 / 1000,
-    },
-    "Gotland": {
-        2010: 1579811000 / 1000,
-        2015: 1926036000 / 1000,
-        2016: 1903887000 / 1000,
-        2017: 1757110000 / 1000,
-        2018: 1740412000 / 1000,
-        2019: 1536480000 / 1000,
-        2020: 1624463000 / 1000,
-        2021: 1621211000 / 1000,
-        2022: 1514132000 / 1000,
-        2023: 1511971000 / 1000,
-        2024: 1387575500 / 1000,
-    },
-}
+CEMENT_DEDUCTION = CEMENT_DEDUCTION_VALUES
 
 
 def deduct_cement(df, cement_deduction):
