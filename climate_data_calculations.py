@@ -100,7 +100,7 @@ def series_to_dict(
         "electricVehiclePerChargePoints": (
             row["EVPC"] if pd.notna(row["EVPC"]) else None
         ),
-        "procurementScore": row["procurementScore"],
+        "procurementScore": int(row["procurementScore"]),
         "procurementLink": row["procurementLink"],
     }
 
