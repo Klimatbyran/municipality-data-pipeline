@@ -66,6 +66,24 @@ def create_new_columns_structure(years_approximated, years_trend, num_rows):
     return new_columns_data
 
 
+def apply_zero_floor(input_df, relevant_cols):
+    """
+    Cut the trend at zero.
+
+    Parameters:
+    - input_df (pandas.DataFrame): The input dataframe containing municipality data.
+
+    Returns:
+    - numpy.ndarray: Predictions for trend cut at zero
+    """
+    df_result = input_df.copy()
+
+    for col in relevant_cols:
+        df_result[col] = np.maximum(df_result[col], 0)
+
+    return df_result
+
+
 def perform_regression_and_predict(
     emissions_sorted,
     historical_years_centered,
@@ -100,7 +118,7 @@ def perform_regression_and_predict(
     return preds_approximated, preds_trend, shift, trend_coefficient
 
 
-def process_municipality_data(
+def fit_regression_per_municipality(
     input_df, year_cols, years, years_approximated, years_trend, new_columns_data
 ):
     """
@@ -194,11 +212,17 @@ def calculate_trend(input_df, current_year, end_year):
     )
 
     # Process each municipality's data
-    process_municipality_data(
+    fit_regression_per_municipality(
         input_df, year_cols, years, years_approximated, years_trend, new_columns_data
     )
 
     # Create new columns DataFrame and concatenate with original
     new_columns_df = pd.DataFrame(new_columns_data)
 
-    return pd.concat([input_df, new_columns_df], axis=1)
+    approximated_cols = [f"approximated_{int(year)}" for year in years_approximated]
+    floored_approximated_df = apply_zero_floor(new_columns_df, approximated_cols)
+
+    trend_cols = [f"trend_{int(year)}" for year in years_trend]
+    floored_future_trend_df = apply_zero_floor(floored_approximated_df, trend_cols)
+
+    return pd.concat([input_df, floored_future_trend_df], axis=1)
