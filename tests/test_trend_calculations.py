@@ -2,7 +2,11 @@
 import unittest
 import pandas as pd
 
-from kpis.emissions.trend_calculations import calculate_total_trend, calculate_trend
+from kpis.emissions.trend_calculations import (
+    calculate_total_trend,
+    calculate_trend,
+    trend_cut_at_zero,
+)
 
 # Sample data frame for Norrköping
 DF_INPUT = pd.DataFrame(
@@ -62,6 +66,77 @@ class TestTrendCalculations(unittest.TestCase):
             282.85714395918365,
             "Trend 2034 is off by ",
         )
+
+    def test_approximated_trend_cut_at_zero(self):
+        """Test the trend cut at zero"""
+        df_expected = pd.DataFrame(
+            {
+                "Kommun": ["Norrköping"],
+                "approximated_2027": [100],
+                "approximated_2028": [50],
+                "approximated_2029": [0],
+                "approximated_2030": [-10],
+                "approximated_2031": [-20],
+            }
+        )
+
+        df_expected = pd.DataFrame(
+            {
+                "Kommun": ["Norrköping"],
+                "approximated_2027": [100],
+                "approximated_2028": [50],
+                "approximated_2029": [0],
+                "approximated_2030": [0],
+                "approximated_2031": [0],
+            }
+        )
+
+        apprixmated_cols = [
+            col for col in df_expected.columns if "approximated_" in col
+        ]
+        df_result = trend_cut_at_zero(df_expected, apprixmated_cols)
+
+        pd.testing.assert_frame_equal(df_result, df_expected)
+
+    def test_future_trend_cut_at_zero(self):
+        """Test the trend cut at zero"""
+        df_input = pd.DataFrame(
+            {
+                "Kommun": ["Norrköping"],
+                "approximated_2026": [110],
+                "approximated_2027": [100],
+                "approximated_2028": [50],
+                "approximated_2029": [0],
+                "approximated_2030": [-10],
+                "trend_2030": [150],
+                "trend_2031": [100],
+                "trend_2032": [50],
+                "trend_2033": [0],
+                "trend_2034": [-50],
+                "trend_2035": [-150],
+            }
+        )
+
+        df_expected = pd.DataFrame(
+            {
+                "Kommun": ["Norrköping"],
+                "approximated_2026": [110],
+                "approximated_2027": [100],
+                "approximated_2028": [50],
+                "approximated_2029": [0],
+                "approximated_2030": [-10],
+                "trend_2030": [150],
+                "trend_2031": [100],
+                "trend_2032": [50],
+                "trend_2033": [0],
+                "trend_2034": [0],
+                "trend_2035": [0],
+            }
+        )
+
+        trend_cols = [col for col in df_input.columns if "trend_" in col]
+        df_result = trend_cut_at_zero(df_input, trend_cols)
+        pd.testing.assert_frame_equal(df_result, df_expected)
 
     def test_calculate_approximated_historical(self):
         """Test the LAD anchored regression for approximated historical emissions"""
