@@ -216,13 +216,13 @@ def calculate_trend(input_df, current_year, end_year):
         input_df, year_cols, years, years_approximated, years_trend, new_columns_data
     )
 
-    approximated_cols = [f"approximated_{str(year)}" for year in years_approximated]
-    apply_zero_floor(new_columns_data, approximated_cols)
-
-    trend_cols = [f"trend_{str(year)}" for year in years_trend]
-    apply_zero_floor(new_columns_data, trend_cols)
-
     # Create new columns DataFrame and concatenate with original
     new_columns_df = pd.DataFrame(new_columns_data)
 
-    return pd.concat([input_df, new_columns_df], axis=1)
+    approximated_cols = [f"approximated_{int(year)}" for year in years_approximated]
+    floored_approximated_df = apply_zero_floor(new_columns_df, approximated_cols)
+
+    trend_cols = [f"trend_{int(year)}" for year in years_trend]
+    floored_future_trend_df = apply_zero_floor(floored_approximated_df, trend_cols)
+
+    return pd.concat([input_df, floored_future_trend_df], axis=1)
