@@ -66,6 +66,24 @@ def create_new_columns_structure(years_approximated, years_trend, num_rows):
     return new_columns_data
 
 
+def trend_cut_at_zero(input_df, relevant_cols):
+    """
+    Cut the trend at zero.
+
+    Parameters:
+    - input_df (pandas.DataFrame): The input dataframe containing municipality data.
+
+    Returns:
+    - numpy.ndarray: Predictions for trend cut at zero
+    """
+    df_result = input_df.copy()
+
+    for col in relevant_cols:
+        df_result[col] = np.maximum(df_result[col], 0)
+
+    return df_result
+
+
 def perform_regression_and_predict(
     emissions_sorted,
     historical_years_centered,
