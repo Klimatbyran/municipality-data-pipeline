@@ -5,7 +5,7 @@ import pandas as pd
 from kpis.emissions.trend_calculations import (
     calculate_total_trend,
     calculate_trend,
-    trend_cut_at_zero,
+    apply_zero_floor,
 )
 
 # Sample data frame for Norrköping
@@ -94,7 +94,7 @@ class TestTrendCalculations(unittest.TestCase):
         apprixmated_cols = [
             col for col in df_expected.columns if "approximated_" in col
         ]
-        df_result = trend_cut_at_zero(df_expected, apprixmated_cols)
+        df_result = apply_zero_floor(df_expected, apprixmated_cols)
 
         pd.testing.assert_frame_equal(df_result, df_expected)
 
@@ -135,7 +135,7 @@ class TestTrendCalculations(unittest.TestCase):
         )
 
         trend_cols = [col for col in df_input.columns if "trend_" in col]
-        df_result = trend_cut_at_zero(df_input, trend_cols)
+        df_result = apply_zero_floor(df_input, trend_cols)
         pd.testing.assert_frame_equal(df_result, df_expected)
 
     def test_calculate_approximated_historical(self):

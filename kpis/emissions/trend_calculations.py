@@ -66,7 +66,7 @@ def create_new_columns_structure(years_approximated, years_trend, num_rows):
     return new_columns_data
 
 
-def trend_cut_at_zero(input_df, relevant_cols):
+def apply_zero_floor(input_df, relevant_cols):
     """
     Cut the trend at zero.
 
@@ -118,7 +118,7 @@ def perform_regression_and_predict(
     return preds_approximated, preds_trend, shift, trend_coefficient
 
 
-def process_municipality_data(
+def fit_regression_per_municipality(
     input_df, year_cols, years, years_approximated, years_trend, new_columns_data
 ):
     """
@@ -212,7 +212,7 @@ def calculate_trend(input_df, current_year, end_year):
     )
 
     # Process each municipality's data
-    process_municipality_data(
+    fit_regression_per_municipality(
         input_df, year_cols, years, years_approximated, years_trend, new_columns_data
     )
 
