@@ -6,8 +6,10 @@ from kpis.cars.ev_change_rate import get_ev_change_rate
 
 
 class TestBicycleCalculations(unittest.TestCase):
+    """Test the ev change rate calculations"""
 
     def test_get_ev_change_rate(self):
+        """Test the get_ev_change_rate function"""
         df_expected = pd.DataFrame(
             {
                 "Kommun": ["Ale"],

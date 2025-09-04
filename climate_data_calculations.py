@@ -96,7 +96,6 @@ def series_to_dict(
         "trend": {str(year): row[year] for year in trend_columns},
         "historicalEmissionChangePercent": row["historicalEmissionChangePercent"],
         "electricCarChangePercent": row["evChangeRate"],
-        "electricCarChangeYearly": row["evChangeYearly"],
         "climatePlanLink": row["Länk till aktuell klimatplan"],
         "climatePlanYear": row["Antagen år"],
         "climatePlanComment": row["Namn, giltighetsår, kommentar"],
@@ -132,7 +131,6 @@ def df_to_dict(input_df: pd.DataFrame, num_decimals: int) -> dict:
         col for col in input_df.columns if "approximated_" in str(col)
     ]
     trend_columns = [col for col in input_df.columns if "trend_" in str(col)]
-    ev_change_columns = [col for col in input_df.columns if "evChange_" in str(col)]
 
     print(input_df.info())
 
@@ -144,7 +142,6 @@ def df_to_dict(input_df: pd.DataFrame, num_decimals: int) -> dict:
                     historical_columns,
                     approximated_columns,
                     trend_columns,
-                    ev_change_columns,
                 ),
                 num_decimals,
             )
@@ -154,7 +151,6 @@ def df_to_dict(input_df: pd.DataFrame, num_decimals: int) -> dict:
                 historical_columns,
                 approximated_columns,
                 trend_columns,
-                ev_change_columns,
             )
         )
         for i in range(len(input_df))
