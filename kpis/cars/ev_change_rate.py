@@ -27,16 +27,15 @@ def get_ev_change_rate(df, to_percent: bool = True):
         2024,
     ]  # NOTE: this needs to be updated if the data is updated
 
-    df_raw_cars["evChangeYearly"] = df_raw_cars.apply(
-        lambda x: {year: x.loc[year] * (100 if to_percent else 1) for year in years},
-        axis=1,
-    )
+    for year in years:
+        df_raw_cars[f"evChange_{year}"] = df_raw_cars[year] * (100 if to_percent else 1)
 
     df_raw_cars["evChangeRate"] = df_raw_cars["evChangeRate"] * (
         100 if to_percent else 1
     )
 
-    df_cars = df_raw_cars.filter(["Kommun", "evChangeRate", "evChangeYearly"], axis=1)
+    yearly_columns = [f"evChange_{year}" for year in years]
+    df_cars = df_raw_cars.filter(["Kommun", "evChangeRate"] + yearly_columns, axis=1)
 
     df = df.merge(df_cars, on="Kommun", how="left")
 

@@ -91,12 +91,12 @@ def series_to_dict(
         "emissions": {str(year): row[year] for year in historical_columns},
         "sumCarbonLawPath": row["totalCarbonLawPath"],
         "approximatedHistoricalEmission": {
-            str(year): row[year] for year in approximated_columns
+            year.replace("approximated_", ""): row[year]
+            for year in approximated_columns
         },
-        "trend": {str(year): row[year] for year in trend_columns},
+        "trend": {year.replace("trend_", ""): row[year] for year in trend_columns},
         "historicalEmissionChangePercent": row["historicalEmissionChangePercent"],
         "electricCarChangePercent": row["evChangeRate"],
-        "electricCarChangeYearly": row["evChangeYearly"],
         "climatePlanLink": row["Länk till aktuell klimatplan"],
         "climatePlanYear": row["Antagen år"],
         "climatePlanComment": row["Namn, giltighetsår, kommentar"],
@@ -112,19 +112,6 @@ def series_to_dict(
     }
 
 
-def round_processing(v, num_decimals: int):
-    new_v = v
-    if isinstance(v, float):
-        new_v = np.round(v, num_decimals)
-    elif isinstance(v, dict):
-        new_v = {k: round_processing(a, num_decimals) for k, a in v.items()}
-    return new_v
-
-
-def max_decimals(entry: Dict, num_decimals: int) -> Dict:
-    return {k: round_processing(v, num_decimals) for k, v in entry.items()}
-
-
 def df_to_dict(input_df: pd.DataFrame, num_decimals: int) -> dict:
     """Convert dataframe to list of dictionaries with optional decimal rounding."""
     historical_columns = [col for col in input_df.columns if str(col).isdigit()]
@@ -133,24 +120,17 @@ def df_to_dict(input_df: pd.DataFrame, num_decimals: int) -> dict:
     ]
     trend_columns = [col for col in input_df.columns if "trend_" in str(col)]
 
+    print(input_df.info())
+    rounded_df = input_df.round(num_decimals)
+
     return [
         (
-            max_decimals(
-                series_to_dict(
-                    input_df.iloc[i],
-                    historical_columns,
-                    approximated_columns,
-                    trend_columns,
-                ),
-                num_decimals,
-            )
-            if num_decimals >= 0
-            else series_to_dict(
-                input_df.iloc[i],
+            series_to_dict(
+                rounded_df.iloc[i],
                 historical_columns,
                 approximated_columns,
                 trend_columns,
-            )
+            ),
         )
         for i in range(len(input_df))
     ]
