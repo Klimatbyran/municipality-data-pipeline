@@ -91,9 +91,10 @@ def series_to_dict(
         "emissions": {str(year): row[year] for year in historical_columns},
         "sumCarbonLawPath": row["totalCarbonLawPath"],
         "approximatedHistoricalEmission": {
-            str(year): row[year] for year in approximated_columns
+            year.replace("approximated_", ""): row[year]
+            for year in approximated_columns
         },
-        "trend": {str(year): row[year] for year in trend_columns},
+        "trend": {year.replace("trend_", ""): row[year] for year in trend_columns},
         "historicalEmissionChangePercent": row["historicalEmissionChangePercent"],
         "electricCarChangePercent": row["evChangeRate"],
         "climatePlanLink": row["Länk till aktuell klimatplan"],
