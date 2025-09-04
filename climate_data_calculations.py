@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 
 from facts.municipalities_counties import get_municipalities
+from facts.political.political_rule import get_political_rule
 from kpis.bicycles.bicycle_data_calculations import calculate_bike_lane_per_capita
 from kpis.cars.electric_vehicle_per_charge_points import (
     get_electric_vehicle_per_charge_points,
@@ -61,6 +62,10 @@ def create_dataframe(to_percentage: bool) -> pd.DataFrame:
     )
     print("8. Climate requirements in procurements added")
 
+    political_rule_df = get_political_rule()
+    result_df = result_df.merge(political_rule_df, on="Kommun", how="left")
+    print("9. Political rule added")
+
     return result_df.sort_values(by="Kommun").reset_index(drop=True)
 
 
@@ -102,6 +107,8 @@ def series_to_dict(
         ),
         "procurementScore": int(row["procurementScore"]),
         "procurementLink": row["procurementLink"],
+        "politicalRule": row["Rule"],
+        "politicalKSO": row["KSO"],
     }
 
 
