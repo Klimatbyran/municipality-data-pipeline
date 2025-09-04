@@ -89,7 +89,7 @@ def series_to_dict(
         "name": row["Kommun"],
         "region": row["Län"],
         "emissions": {str(year): row[year] for year in historical_columns},
-        "budget": row["totalCarbonLawPath"],
+        "sumCarbonLawPath": row["totalCarbonLawPath"],
         "approximatedHistoricalEmission": {
             str(year): row[year] for year in approximated_columns
         },
