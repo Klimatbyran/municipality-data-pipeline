@@ -152,8 +152,8 @@
     "electricVehiclePerChargePoints": 54.43,
     "procurementScore": 0,
     "procurementLink": null,
-    "politicalRule": NaN,
-    "politicalKSO": NaN
+    "politicalRule": ["M", "L", "C"],
+    "politicalKSO": "M"
   },
   {
     "name": "Alvesta",
