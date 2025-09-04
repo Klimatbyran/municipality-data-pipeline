@@ -10,6 +10,7 @@ from facts.political.political_rule import (
 
 
 class TestPoliticalRule(unittest.TestCase):
+    """Test the political rule"""
 
     def test_clean_municipality_name(self):
         """Test that clean_municipality_name returns correct data."""
