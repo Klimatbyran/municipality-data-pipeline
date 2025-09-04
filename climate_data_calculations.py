@@ -118,9 +118,12 @@ def df_to_dict(input_df: pd.DataFrame, num_decimals: int) -> dict:
     approximated_columns = [
         col for col in input_df.columns if "approximated_" in str(col)
     ]
-    trend_columns = [col for col in input_df.columns if "trend_" in str(col)]
+    trend_columns = [
+        col
+        for col in input_df.columns
+        if "trend_" in str(col) and "coefficient" not in str(col)
+    ]
 
-    print(input_df.info())
     rounded_df = input_df.round(num_decimals)
 
     return [
