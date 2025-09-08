@@ -7,7 +7,7 @@ import numpy as np
 
 from kpis.emissions.cement_deductions import CEMENT_DEDUCTION_VALUES
 from kpis.emissions.historical_data_calculations import get_n_prep_data_from_smhi
-from kpis.emissions.trend_calculations import calculate_trend
+from kpis.emissions.trend_calculations import calculate_total_trend, calculate_trend
 from kpis.emissions.carbon_law_calculations import calculate_carbon_law_total
 
 
@@ -105,6 +105,10 @@ def emission_calculations(df):
     df_cem = deduct_cement(df_smhi, CEMENT_DEDUCTION)
 
     df_trend_and_approximated = calculate_trend(df_cem, CURRENT_YEAR, END_YEAR)
+
+    df_trend_and_approximated["totalTrend"] = calculate_total_trend(
+        df_trend_and_approximated
+    )
 
     df_historical_change_percent = calculate_historical_change_percent(
         df_trend_and_approximated, LAST_YEAR_WITH_SMHI_DATA
