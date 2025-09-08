@@ -61,7 +61,7 @@ def create_new_columns_structure(years_approximated, years_trend, num_rows):
     }
     for year in years_trend:
         new_columns_data[f"trend_{int(year)}"] = [None] * num_rows
-    new_columns_data["trend_coefficient"] = [None] * num_rows
+    new_columns_data["emission_slope"] = [None] * num_rows
 
     return new_columns_data
 
@@ -100,7 +100,7 @@ def perform_regression_and_predict(
     - trend_years_centered (numpy.ndarray): Trend years centered at last observed year
 
     Returns:
-    - tuple: (preds_approximated, preds_trend, shift, trend_coefficient)
+    - tuple: (preds_approximated, preds_trend, shift, emission_slope)
     """
     historical_design_matrix = sm.add_constant(historical_years_centered)
     approximated_design_matrix = sm.add_constant(approximated_years_centered)
@@ -113,9 +113,9 @@ def perform_regression_and_predict(
 
     intercept_at_last = res.predict([1.0, 0.0])[0]  # x=0 == last year
     shift = emissions_sorted[-1] - intercept_at_last
-    trend_coefficient = res.params[1]
+    emission_slope = res.params[1]
 
-    return preds_approximated, preds_trend, shift, trend_coefficient
+    return preds_approximated, preds_trend, shift, emission_slope
 
 
 def fit_regression_per_municipality(
@@ -147,7 +147,7 @@ def fit_regression_per_municipality(
         approximated_years_centered = years_approximated - years_sorted[-1]
         trend_years_centered = years_trend - years_sorted[-1]
 
-        preds_approximated, preds_trend, shift, trend_coefficient = (
+        preds_approximated, preds_trend, shift, emission_slope = (
             perform_regression_and_predict(
                 emissions_sorted,
                 historical_years_centered,
@@ -166,7 +166,7 @@ def fit_regression_per_municipality(
             column_name = f"trend_{int(year)}"
             new_columns_data[column_name][idx] = preds_trend[i] + shift
 
-        new_columns_data["trend_coefficient"][idx] = trend_coefficient
+        new_columns_data["emission_slope"][idx] = emission_slope
 
 
 def calculate_total_trend(input_df):
@@ -179,8 +179,9 @@ def calculate_total_trend(input_df):
     Returns:
     - total trend (int): Total trend for the input dataframe.
     """
-    trend_columns = [col for col in input_df.columns if "trend_" in col]
-    return input_df[trend_columns].sum().sum()
+    trend_columns = [col for col in input_df.columns if "trend_" in str(col)]
+    trend_values = input_df[trend_columns].values
+    return trend_values.sum()
 
 
 def calculate_trend(input_df, current_year, end_year):
