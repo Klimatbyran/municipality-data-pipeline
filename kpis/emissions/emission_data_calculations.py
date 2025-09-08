@@ -89,6 +89,13 @@ def calculate_historical_change_percent(df, last_year_in_range):
     return df
 
 
+def calculate_meets_paris_goal(total_trend, total_carbon_law_path):
+    """
+    Calculate if the municipality meets the Paris goal.
+    """
+    return total_trend <= total_carbon_law_path
+
+
 def emission_calculations(df):
     """
     Perform emission calculations based on the given dataframe.
@@ -108,6 +115,11 @@ def emission_calculations(df):
 
     df_trend_and_approximated["totalTrend"] = calculate_total_trend(
         df_trend_and_approximated
+    )
+
+    df_trend_and_approximated["meetsParisGoal"] = calculate_meets_paris_goal(
+        df_trend_and_approximated["totalTrend"],
+        df_trend_and_approximated["totalCarbonLawPath"],
     )
 
     df_historical_change_percent = calculate_historical_change_percent(
