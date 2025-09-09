@@ -7,7 +7,7 @@ import numpy as np
 
 from kpis.emissions.cement_deductions import CEMENT_DEDUCTION_VALUES
 from kpis.emissions.historical_data_calculations import get_n_prep_data_from_smhi
-from kpis.emissions.trend_calculations import calculate_total_trend, calculate_trend
+from kpis.emissions.trend_calculations import calculate_trend
 from kpis.emissions.carbon_law_calculations import calculate_carbon_law_total
 
 
