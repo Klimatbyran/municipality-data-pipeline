@@ -136,7 +136,4 @@ def emission_calculations(df):
         axis=1,
     )
 
-    print(df_carbon_law[df_carbon_law["Kommun"] == "Aneby"]["emission_slope"])
-    print(df_carbon_law[df_carbon_law["Kommun"] == "Aneby"]["totalTrend"])
-
     return df_carbon_law
