@@ -7,7 +7,7 @@ import numpy as np
 
 from kpis.emissions.cement_deductions import CEMENT_DEDUCTION_VALUES
 from kpis.emissions.historical_data_calculations import get_n_prep_data_from_smhi
-from kpis.emissions.trend_calculations import calculate_total_trend, calculate_trend
+from kpis.emissions.trend_calculations import calculate_trend
 from kpis.emissions.carbon_law_calculations import calculate_carbon_law_total
 
 
@@ -93,11 +93,7 @@ def calculate_meets_paris_goal(total_trend, total_carbon_law_path):
     """
     Calculate if the municipality meets the Paris goal.
     """
-    print("--------------------------------")
-    print(total_trend, total_carbon_law_path)
-    result = total_trend <= total_carbon_law_path
-    print(result)
-    return result
+    return total_trend <= total_carbon_law_path
 
 
 def emission_calculations(df):

@@ -4,7 +4,6 @@ import argparse
 import json
 from typing import Any, Dict, List
 
-import numpy as np
 import pandas as pd
 
 from facts.municipalities_counties import get_municipalities
