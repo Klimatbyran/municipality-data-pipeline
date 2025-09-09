@@ -93,11 +93,7 @@ def calculate_meets_paris_goal(total_trend, total_carbon_law_path):
     """
     Calculate if the municipality meets the Paris goal.
     """
-    print("--------------------------------")
-    print(total_trend, total_carbon_law_path)
-    result = total_trend <= total_carbon_law_path
-    print(result)
-    return result
+    return total_trend <= total_carbon_law_path
 
 
 def emission_calculations(df):
@@ -139,5 +135,8 @@ def emission_calculations(df):
         ),
         axis=1,
     )
+
+    print(df_carbon_law[df_carbon_law["Kommun"] == "Aneby"]["emission_slope"])
+    print(df_carbon_law[df_carbon_law["Kommun"] == "Aneby"]["totalTrend"])
 
     return df_carbon_law

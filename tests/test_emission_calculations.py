@@ -6,6 +6,7 @@ from kpis.emissions.emission_data_calculations import (
     calculate_historical_change_percent,
     deduct_cement,
     calculate_meets_paris_goal,
+    emission_calculations,
 )
 
 
@@ -154,6 +155,136 @@ class TestEmissionCalculations(unittest.TestCase):
         df_result["meetsParisGoal"] = calculate_meets_paris_goal(
             df_input["totalTrend"].iloc[0], df_input["totalCarbonLawPath"].iloc[0]
         )
+
+        pd.testing.assert_frame_equal(df_result, df_expected)
+
+    def test_emission_calculations_for_ale(self):
+        """Test the emission calculations"""
+        df_input = pd.DataFrame(
+            {
+                "Kommun": ["Ale"],
+            }
+        )
+
+        df_expected = pd.DataFrame(
+            {
+                "Kommun": ["Ale"],
+                1990: [122479.269721],
+                2000: [149847.593565],
+                2005: [137858.649371],
+                2010: [162048.314627],
+                2015: [153825.085295],
+                2016: [152178.7955],
+                2017: [155980.925217],
+                2018: [162008.760113],
+                2019: [168504.59322],
+                2020: [151960.022899],
+                2021: [157751.287931],
+                2022: [142529.055614],
+                2023: [136223.552398],
+                "approximated_2023": [136223.552398],
+                "approximated_2024": [137338.050884],
+                "approximated_2025": [138452.54937],
+                "trend_2025": [138452.54937],
+                "trend_2026": [139567.047856],
+                "trend_2027": [140681.546342],
+                "trend_2028": [141796.044829],
+                "trend_2029": [142910.543315],
+                "trend_2030": [144025.041801],
+                "trend_2031": [145139.540287],
+                "trend_2032": [146254.038773],
+                "trend_2033": [147368.537259],
+                "trend_2034": [148483.035745],
+                "trend_2035": [149597.534231],
+                "trend_2036": [150712.032718],
+                "trend_2037": [151826.531204],
+                "trend_2038": [152941.02969],
+                "trend_2039": [154055.528176],
+                "trend_2040": [155170.026662],
+                "trend_2041": [156284.525148],
+                "trend_2042": [157399.023634],
+                "trend_2043": [158513.52212],
+                "trend_2044": [159628.020607],
+                "trend_2045": [160742.519093],
+                "trend_2046": [161857.017579],
+                "trend_2047": [162971.516065],
+                "trend_2048": [164086.014551],
+                "trend_2049": [165200.513037],
+                "trend_2050": [166315.011523],
+                "emission_slope": [1114.498486],
+                "totalTrend": [3961978.291616],
+                "historicalEmissionChangePercent": [-1.347337],
+                "totalCarbonLawPath": [1135119.593573],
+                "meetsParisGoal": [False],
+            }
+        )
+
+        df_result = emission_calculations(df_input)
+
+        pd.testing.assert_frame_equal(df_result, df_expected)
+
+    def test_emission_calculations_for_aneby(self):
+        """Test the emission calculations"""
+        df_input = pd.DataFrame(
+            {
+                "Kommun": ["Aneby"],
+            }
+        )
+
+        df_expected = pd.DataFrame(
+            {
+                "Kommun": ["Aneby"],
+                1990: [60302.63],
+                2000: [55810.58],
+                2005: [56298.36],
+                2010: [49617.91],
+                2015: [44739.82],
+                2016: [44035.07],
+                2017: [46900.28],
+                2018: [44444.87],
+                2019: [44118.53],
+                2020: [43112.83],
+                2021: [42734.47],
+                2022: [41061.31],
+                2023: [42384.8],
+                "approximated_2023": [42384.8],
+                "approximated_2024": [41762.13],
+                "approximated_2025": [41139.46],
+                "trend_2025": [41139.46],
+                "trend_2026": [40516.79],
+                "trend_2027": [39894.11],
+                "trend_2028": [39271.44],
+                "trend_2029": [38648.77],
+                "trend_2030": [38026.1],
+                "trend_2031": [37403.43],
+                "trend_2032": [36780.75],
+                "trend_2033": [36158.08],
+                "trend_2034": [35535.41],
+                "trend_2035": [34912.74],
+                "trend_2036": [34290.07],
+                "trend_2037": [33667.39],
+                "trend_2038": [33044.72],
+                "trend_2039": [32422.05],
+                "trend_2040": [31799.38],
+                "trend_2041": [31176.7],
+                "trend_2042": [30554.03],
+                "trend_2043": [29931.36],
+                "trend_2044": [29308.69],
+                "trend_2045": [28686.02],
+                "trend_2046": [28063.34],
+                "trend_2047": [27440.67],
+                "trend_2048": [26818.0],
+                "trend_2049": [26195.33],
+                "trend_2050": [25572.66],
+                "emission_slope": [-622.67211],
+                "totalTrend": [867257.487553],
+                "historicalEmissionChangePercent": [-0.610923],
+                "totalCarbonLawPath": [337286.714681],
+                "meetsParisGoal": [False],
+            }
+        )
+
+        df_result = emission_calculations(df_input)
 
         pd.testing.assert_frame_equal(df_result, df_expected)
 
