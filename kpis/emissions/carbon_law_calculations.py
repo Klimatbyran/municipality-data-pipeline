@@ -44,7 +44,7 @@ def calculate_carbon_law_future_emissions(
         reduction_rate (float): Annual reduction rate
 
     Returns:
-        pandas.DataFrame: DataFrame with added 'carbonLawFuture' column containing
+       carbon_law_dict (dict): Dictionary with added 'carbonLawFuture' column containing
                           dictionaries of year-emission pairs for future projections
     """
     # Create dictionary to store future emissions
@@ -96,6 +96,7 @@ def calculate_carbon_law_total(
 
     # Calculate carbon law path and total future emissions for each municipality
     for i in range(len(input_df)):
+
         # Get the latest emission value
         latest_emission = get_latest_emission_value(input_df.iloc[i], current_year)
 
@@ -104,9 +105,9 @@ def calculate_carbon_law_total(
             latest_emission, current_year, reduction_rate, end_year
         )
 
-        # Sum the total future emissions
-        input_df.loc[i, "totalCarbonLawPath"] = sum_carbon_law_total_future_emissions(
-            df_carbon_law_future
+        # Sum the total carbon law path
+        input_df.at[input_df.index[i], "totalCarbonLawPath"] = (
+            sum_carbon_law_total_future_emissions(df_carbon_law_future)
         )
 
     return input_df
