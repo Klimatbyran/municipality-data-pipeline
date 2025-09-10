@@ -3,19 +3,21 @@ import pandas as pd
 import statsmodels.api as sm
 
 
-def extract_year_columns(input_df):
+def extract_year_columns(input_df, cutoff_year):
     """
-    Extract and sort year columns from the input dataframe.
+    Extract and sort year columns from the input dataframe. Exclude years before cutoff_year (default 2015).
 
     Parameters:
     - input_df (pandas.DataFrame): The input dataframe containing municipality data.
 
     Returns:
-    - tuple: (year_cols, years, last_data_year)
+    - years, last_data_year (tuple: (numpy.ndarray, int)): Years and the last year with data
     """
     numerical_cols = input_df.select_dtypes(include=[np.number]).columns
     year_cols = [
-        col for col in numerical_cols if str(col).isdigit() and len(str(col)) == 4
+        col
+        for col in numerical_cols
+        if str(col).isdigit() and len(str(col)) == 4 and int(col) >= cutoff_year
     ]
     year_cols = sorted(year_cols)  # Sort years in ascending order
 
@@ -24,7 +26,7 @@ def extract_year_columns(input_df):
 
     last_data_year = int(year_cols[-1])
 
-    return year_cols, years, last_data_year
+    return years, last_data_year
 
 
 def generate_prediction_years(last_data_year, current_year, end_year):
@@ -85,16 +87,17 @@ def apply_zero_floor(input_df, relevant_cols):
 
 
 def perform_regression_and_predict(
-    emissions_sorted,
+    emissions,
     historical_years_centered,
     approximated_years_centered,
     trend_years_centered,
 ):
     """
-    Perform quantile regression and generate predictions.
+    Perform LAD (least absolute deviations) regression and generate predictions.
+    LAD equals median regression with q=0.5.
 
     Parameters:
-    - emissions_sorted (numpy.ndarray): Sorted emissions data
+    - emissions (numpy.ndarray): Emissions data
     - historical_years_centered (numpy.ndarray): Historical years centered at last observed year
     - approximated_years_centered (numpy.ndarray): Approximated years centered at last observed year
     - trend_years_centered (numpy.ndarray): Trend years centered at last observed year
@@ -106,50 +109,48 @@ def perform_regression_and_predict(
     approximated_design_matrix = sm.add_constant(approximated_years_centered)
     trend_design_matrix = sm.add_constant(trend_years_centered)
 
-    res = sm.QuantReg(emissions_sorted, historical_design_matrix).fit(q=0.5)
+    res = sm.QuantReg(emissions, historical_design_matrix).fit(q=0.5)
 
     preds_approximated = res.predict(approximated_design_matrix)
     preds_trend = res.predict(trend_design_matrix)
 
+    # Adjusted for anchor at last observed year
+    # This somewhat poses a conceptual issue since the purpose of LAD is to
+    # minimize the absolute deviations but the anchor is at the last observed year.
+    # This is a trade-off between the purpose of the regression and the purpose of the graph.
     intercept_at_last = res.predict([1.0, 0.0])[0]  # x=0 == last year
-    shift = emissions_sorted[-1] - intercept_at_last
+    shift = emissions[-1] - intercept_at_last
     emission_slope = res.params[1]
 
     return preds_approximated, preds_trend, shift, emission_slope
 
 
 def fit_regression_per_municipality(
-    input_df, year_cols, years, years_approximated, years_trend, new_columns_data
+    input_df, years, years_approximated, years_trend, new_columns_data
 ):
     """
     Process each municipality's data to calculate trends and predictions.
 
     Parameters:
     - input_df (pandas.DataFrame): The input dataframe
-    - year_cols (list): List of year column names
     - years (numpy.ndarray): Array of years
     - years_approximated (numpy.ndarray): Years for approximated data
     - years_trend (numpy.ndarray): Years for trend predictions
     - new_columns_data (dict): Dictionary to store new column data
     """
     for idx in range(len(input_df)):
-        emissions = np.array(
-            [input_df.iloc[idx][col] for col in year_cols], dtype=float
-        )
-
-        order = np.argsort(years)
-        years_sorted, emissions_sorted = years[order], emissions[order]
+        emissions = np.array([input_df.iloc[idx][col] for col in years], dtype=float)
 
         # Center years at the last observed year to improve stability of following regression
         # Regression models work better with smaller numbers closer to zero and
         # all time series are aligned to the same reference point
-        historical_years_centered = years_sorted - years_sorted[-1]
-        approximated_years_centered = years_approximated - years_sorted[-1]
-        trend_years_centered = years_trend - years_sorted[-1]
+        historical_years_centered = years - years[-1]
+        approximated_years_centered = years_approximated - years[-1]
+        trend_years_centered = years_trend - years[-1]
 
         preds_approximated, preds_trend, shift, emission_slope = (
             perform_regression_and_predict(
-                emissions_sorted,
+                emissions,
                 historical_years_centered,
                 approximated_years_centered,
                 trend_years_centered,
@@ -184,9 +185,9 @@ def calculate_total_trend(input_df):
     return trend_values.sum()
 
 
-def calculate_trend(input_df, current_year, end_year):
+def calculate_trend(input_df, current_year, end_year, cutoff_year=2015):
     """
-    LAD (median/quantile) regression, with years centered at the last
+    LAD (least absolute deviations) regression, with years centered at the last
     observed year for numerical stability. Returns predictions anchored
     to the last observed emission value.
 
@@ -200,7 +201,7 @@ def calculate_trend(input_df, current_year, end_year):
                                    until current year and future predictions.
     """
     # Extract year columns and data
-    year_cols, years, last_data_year = extract_year_columns(input_df)
+    years, last_data_year = extract_year_columns(input_df, cutoff_year)
 
     # Generate prediction year ranges
     years_approximated, years_trend = generate_prediction_years(
@@ -214,7 +215,7 @@ def calculate_trend(input_df, current_year, end_year):
 
     # Process each municipality's data
     fit_regression_per_municipality(
-        input_df, year_cols, years, years_approximated, years_trend, new_columns_data
+        input_df, years, years_approximated, years_trend, new_columns_data
     )
 
     # Create new columns DataFrame and concatenate with original
