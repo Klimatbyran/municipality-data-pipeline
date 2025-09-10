@@ -126,13 +126,11 @@ def df_to_dict(input_df: pd.DataFrame, num_decimals: int) -> dict:
     rounded_df = input_df.round(num_decimals)
 
     return [
-        (
-            series_to_dict(
-                rounded_df.iloc[i],
-                historical_columns,
-                approximated_columns,
-                trend_columns,
-            ),
+        series_to_dict(
+            rounded_df.iloc[i],
+            historical_columns,
+            approximated_columns,
+            trend_columns,
         )
         for i in range(len(input_df))
     ]
