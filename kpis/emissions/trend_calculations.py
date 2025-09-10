@@ -11,7 +11,7 @@ def extract_year_columns(input_df):
     - input_df (pandas.DataFrame): The input dataframe containing municipality data.
 
     Returns:
-    - tuple: (year_cols, years, last_data_year)
+    - years, last_data_year (tuple: (numpy.ndarray, int)): Years and the last year with data
     """
     numerical_cols = input_df.select_dtypes(include=[np.number]).columns
     year_cols = [
@@ -24,7 +24,7 @@ def extract_year_columns(input_df):
 
     last_data_year = int(year_cols[-1])
 
-    return year_cols, years, last_data_year
+    return years, last_data_year
 
 
 def generate_prediction_years(last_data_year, current_year, end_year):
@@ -119,23 +119,20 @@ def perform_regression_and_predict(
 
 
 def fit_regression_per_municipality(
-    input_df, year_cols, years, years_approximated, years_trend, new_columns_data
+    input_df, years, years_approximated, years_trend, new_columns_data
 ):
     """
     Process each municipality's data to calculate trends and predictions.
 
     Parameters:
     - input_df (pandas.DataFrame): The input dataframe
-    - year_cols (list): List of year column names
     - years (numpy.ndarray): Array of years
     - years_approximated (numpy.ndarray): Years for approximated data
     - years_trend (numpy.ndarray): Years for trend predictions
     - new_columns_data (dict): Dictionary to store new column data
     """
     for idx in range(len(input_df)):
-        emissions = np.array(
-            [input_df.iloc[idx][col] for col in year_cols], dtype=float
-        )
+        emissions = np.array([input_df.iloc[idx][col] for col in years], dtype=float)
 
         order = np.argsort(years)
         years_sorted, emissions_sorted = years[order], emissions[order]
@@ -155,6 +152,9 @@ def fit_regression_per_municipality(
                 trend_years_centered,
             )
         )
+
+        print(f"Emission slope for {input_df.iloc[idx]['Kommun']}: {emission_slope}")
+        print(" ")
 
         # Store approximated historical data
         for i, year in enumerate(years_approximated):
@@ -200,7 +200,7 @@ def calculate_trend(input_df, current_year, end_year):
                                    until current year and future predictions.
     """
     # Extract year columns and data
-    year_cols, years, last_data_year = extract_year_columns(input_df)
+    years, last_data_year = extract_year_columns(input_df)
 
     # Generate prediction year ranges
     years_approximated, years_trend = generate_prediction_years(
@@ -214,7 +214,7 @@ def calculate_trend(input_df, current_year, end_year):
 
     # Process each municipality's data
     fit_regression_per_municipality(
-        input_df, year_cols, years, years_approximated, years_trend, new_columns_data
+        input_df, years, years_approximated, years_trend, new_columns_data
     )
 
     # Create new columns DataFrame and concatenate with original
