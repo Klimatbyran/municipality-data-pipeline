@@ -210,36 +210,36 @@ class TestTrendCalculations(unittest.TestCase):
         self.assertEqual(rounded_shift, 70.0)
         self.assertEqual(rounded_emission_slope, 10.0)
 
-    # def test_calculate_approximated_historical(self):
-    #     """Test the LAD anchored regression for approximated historical emissions"""
+    def test_calculate_approximated_historical(self):
+        """Test the LAD anchored regression for approximated historical emissions"""
 
-    #     df_result = calculate_trend(DF_INPUT, CURRENT_YEAR, END_YEAR)
+        df_result = calculate_trend(DF_INPUT, CURRENT_YEAR, END_YEAR, CUTOFF_YEAR)
 
-    #     expected_approximated = [
-    #         "approximated_2025",
-    #         "approximated_2026",
-    #         "approximated_2027",
-    #         "approximated_2028",
-    #         "approximated_2029",
-    #     ]
+        expected_approximated = [
+            "approximated_2025",
+            "approximated_2026",
+            "approximated_2027",
+            "approximated_2028",
+            "approximated_2029",
+        ]
 
-    #     self.assertTrue(
-    #         all(col in df_result.columns for col in expected_approximated),
-    #         f"Missing approximated columns: {set(expected_approximated) - set(df_result.columns)}",
-    #     )
+        self.assertTrue(
+            all(col in df_result.columns for col in expected_approximated),
+            f"Missing approximated columns: {set(expected_approximated) - set(df_result.columns)}",
+        )
 
-    #     self._compare_approximated_results(
-    #         df_result,
-    #         "approximated_2025",
-    #         180,
-    #         "Approximated value for 2025 is off by ",
-    #     )
-    #     self._compare_approximated_results(
-    #         df_result,
-    #         "approximated_2029",
-    #         225.71428620408162,
-    #         "Approximated value for 2029 is off by ",
-    #     )
+        self._compare_predicted_results(
+            df_result,
+            "approximated_2025",
+            180,
+            "Approximated value for 2025 is off by ",
+        )
+        self._compare_predicted_results(
+            df_result,
+            "approximated_2029",
+            225.71428620408162,
+            "Approximated value for 2029 is off by ",
+        )
 
     # def test_total_trend(self):
     #     """Test the total trend"""
