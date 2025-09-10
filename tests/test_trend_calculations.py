@@ -3,6 +3,8 @@ import unittest
 import pandas as pd
 
 from kpis.emissions.trend_calculations import (
+    extract_year_columns,
+    generate_prediction_years,
     calculate_total_trend,
     calculate_trend,
     apply_zero_floor,
@@ -29,6 +31,27 @@ END_YEAR = 2035
 
 class TestTrendCalculations(unittest.TestCase):
     """Test the emission trend calculations"""
+
+    def test_extract_year_columns(self):
+        """Test the extract_year_columns function"""
+        DF_INPUT["2001_test"] = [190]
+
+        years, last_data_year = extract_year_columns(DF_INPUT)
+
+        self.assertEqual(
+            years.tolist(),
+            [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
+            "Years are not equal",
+        )
+        self.assertEqual(last_data_year, 2025, "Last data year is not equal")
+
+    def test_generate_prediction_years(self):
+        """Test the generate_prediction_years function"""
+        years_approximated, years_trend = generate_prediction_years(2025, 2029, 2035)
+        self.assertEqual(years_approximated.tolist(), [2025, 2026, 2027, 2028, 2029])
+        self.assertEqual(
+            years_trend.tolist(), [2029, 2030, 2031, 2032, 2033, 2034, 2035]
+        )
 
     def _compare_approximated_results(
         self, df_result, column_name, expected_value, test_string
