@@ -241,27 +241,27 @@ class TestTrendCalculations(unittest.TestCase):
             "Approximated value for 2029 is off by ",
         )
 
-    # def test_total_trend(self):
-    #     """Test the total trend"""
+    def test_total_trend(self):
+        """Test the total trend"""
 
-    #     df_input = pd.DataFrame(
-    #         {
-    #             "Kommun": ["Norrköping"],
-    #             "trend_2029": [100],
-    #             "trend_2030": [150],
-    #             "trend_2031": [200],
-    #             "trend_2032": [250],
-    #             "trend_2033": [300],
-    #             "trend_2034": [350],
-    #             "trend_2035": [400],
-    #         }
-    #     )
+        df_input = pd.DataFrame(
+            {
+                "Kommun": ["Norrköping"],
+                "trend_2029": [100],
+                "trend_2030": [150],
+                "trend_2031": [200],
+                "trend_2032": [250],
+                "trend_2033": [300],
+                "trend_2034": [350],
+                "trend_2035": [400],
+            }
+        )
 
-    #     expected_total_trend = 1750
+        expected_total_trend = 1750
 
-    #     resulting_value = calculate_total_trend(df_input)
+        resulting_value = calculate_total_trend(df_input, CUTOFF_YEAR)
 
-    #     self.assertEqual(resulting_value, expected_total_trend)
+        self.assertEqual(resulting_value, expected_total_trend)
 
 
 if __name__ == "__main__":
