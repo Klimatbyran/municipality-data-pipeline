@@ -5,6 +5,7 @@ import pandas as pd
 from kpis.emissions.trend_calculations import (
     extract_year_columns,
     generate_prediction_years,
+    create_new_columns_structure,
     calculate_total_trend,
     calculate_trend,
     apply_zero_floor,
@@ -51,6 +52,32 @@ class TestTrendCalculations(unittest.TestCase):
         self.assertEqual(years_approximated.tolist(), [2025, 2026, 2027, 2028, 2029])
         self.assertEqual(
             years_trend.tolist(), [2029, 2030, 2031, 2032, 2033, 2034, 2035]
+        )
+
+    def create_new_columns_structure(self):
+        """Test the create_new_columns_structure function"""
+        new_columns_data = create_new_columns_structure(
+            [2025, 2026, 2027, 2028, 2029],
+            [2029, 2030, 2031, 2032, 2033, 2034, 2035],
+            1,
+        )
+        self.assertEqual(
+            new_columns_data,
+            {
+                "approximated_2025": [None],
+                "approximated_2026": [None],
+                "approximated_2027": [None],
+                "approximated_2028": [None],
+                "approximated_2029": [None],
+                "trend_2029": [None],
+                "trend_2030": [None],
+                "trend_2031": [None],
+                "trend_2032": [None],
+                "trend_2033": [None],
+                "trend_2034": [None],
+                "trend_2035": [None],
+                "emission_slope": [None],
+            },
         )
 
     def _compare_approximated_results(
