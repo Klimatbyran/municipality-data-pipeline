@@ -93,7 +93,8 @@ def perform_regression_and_predict(
     trend_years_centered,
 ):
     """
-    Perform quantile regression and generate predictions.
+    Perform LAD (least absolute deviations) regression and generate predictions.
+    LAD equals median regression with q=0.5.
 
     Parameters:
     - emissions (numpy.ndarray): Emissions data
@@ -113,6 +114,10 @@ def perform_regression_and_predict(
     preds_approximated = res.predict(approximated_design_matrix)
     preds_trend = res.predict(trend_design_matrix)
 
+    # Adjusted for anchor at last observed year
+    # This somewhat poses a conceptual issue since the purpose of LAD is to
+    # minimize the absolute deviations but the anchor is at the last observed year.
+    # This is a trade-off between the purpose of the regression and the purpose of the graph.
     intercept_at_last = res.predict([1.0, 0.0])[0]  # x=0 == last year
     shift = emissions[-1] - intercept_at_last
     emission_slope = res.params[1]
@@ -182,7 +187,7 @@ def calculate_total_trend(input_df):
 
 def calculate_trend(input_df, current_year, end_year, cutoff_year=2015):
     """
-    LAD (median/quantile) regression, with years centered at the last
+    LAD (least absolute deviations) regression, with years centered at the last
     observed year for numerical stability. Returns predictions anchored
     to the last observed emission value.
 
