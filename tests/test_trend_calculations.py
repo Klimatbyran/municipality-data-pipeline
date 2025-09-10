@@ -259,7 +259,7 @@ class TestTrendCalculations(unittest.TestCase):
 
         expected_total_trend = 1750
 
-        resulting_value = calculate_total_trend(df_input, CUTOFF_YEAR)
+        resulting_value = calculate_total_trend(df_input)
 
         self.assertEqual(resulting_value, expected_total_trend)
 
