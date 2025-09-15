@@ -95,6 +95,7 @@ def perform_regression_and_predict(
     """
     Perform LAD (least absolute deviations) regression and generate predictions.
     LAD equals median regression with q=0.5.
+    Predictions are anchored to the last historical data point.
 
     Parameters:
     - emissions (numpy.ndarray): Emissions data
@@ -111,18 +112,24 @@ def perform_regression_and_predict(
 
     res = sm.QuantReg(emissions, historical_design_matrix).fit(q=0.5)
 
-    preds_approximated = res.predict(approximated_design_matrix)
-    preds_trend = res.predict(trend_design_matrix)
+    # Get raw predictions from the regression
+    preds_approximated_raw = res.predict(approximated_design_matrix)
+    preds_trend_raw = res.predict(trend_design_matrix)
 
-    # Adjusted for anchor at last observed year
-    # This somewhat poses a conceptual issue since the purpose of LAD is to
-    # minimize the absolute deviations but the anchor is at the last observed year.
-    # This is a trade-off between the purpose of the regression and the purpose of the graph.
-    intercept_at_last = res.predict([1.0, 0.0])[0]  # x=0 == last year
-    shift = emissions[-1] - intercept_at_last
+    # Calculate the predicted value at the last historical year (x=0 in centered coordinates)
+    predicted_at_last_year = res.predict([1.0, 0.0])[0]
+
+    # Calculate shift to anchor predictions to actual last historical data point
+    last_historical_value = emissions[-1]
+    shift = last_historical_value - predicted_at_last_year
+
+    # Apply shift to anchor all predictions to the last historical data point
+    preds_approximated = preds_approximated_raw + shift
+    preds_trend = preds_trend_raw + shift
+
     emission_slope = res.params[1]
 
-    return preds_approximated, preds_trend, shift, emission_slope
+    return preds_approximated, preds_trend, emission_slope
 
 
 def fit_regression_per_municipality(
@@ -148,7 +155,7 @@ def fit_regression_per_municipality(
         approximated_years_centered = years_approximated - years[-1]
         trend_years_centered = years_trend - years[-1]
 
-        preds_approximated, preds_trend, shift, emission_slope = (
+        preds_approximated, preds_trend, emission_slope = (
             perform_regression_and_predict(
                 emissions,
                 historical_years_centered,
@@ -157,15 +164,15 @@ def fit_regression_per_municipality(
             )
         )
 
-        # Store approximated historical data
+        # Store approximated historical data (already anchored)
         for i, year in enumerate(years_approximated):
             column_name = f"approximated_{int(year)}"
-            new_columns_data[column_name][idx] = preds_approximated[i] + shift
+            new_columns_data[column_name][idx] = preds_approximated[i]
 
-        # Store trend data
+        # Store trend data (already anchored)
         for i, year in enumerate(years_trend):
             column_name = f"trend_{int(year)}"
-            new_columns_data[column_name][idx] = preds_trend[i] + shift
+            new_columns_data[column_name][idx] = preds_trend[i]
 
         new_columns_data["emission_slope"][idx] = emission_slope
 

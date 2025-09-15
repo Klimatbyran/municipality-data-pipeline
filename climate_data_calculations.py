@@ -164,6 +164,8 @@ if __name__ == "__main__":
 
     df = create_dataframe(args.to_percentage)
 
+    df.to_excel("output/climate-data.xlsx")
+
     temp = df_to_dict(df, args.num_decimals)
 
     output_file = args.outfile
