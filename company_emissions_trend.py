@@ -188,16 +188,26 @@ def calculate_company_emissions_trends(df, end_year=2030, cutoff_year=2015):
     """
 
     # Extract year columns and data
-    years, last_data_year = extract_year_columns(df, cutoff_year)
+    years, global_last_data_year = extract_year_columns(df, cutoff_year)
 
-    # Generate prediction years starting from the next year after last data
-    years_trend = np.arange(last_data_year, end_year + 1, dtype=float)
+    # Extract scope1+2 year columns separately
+    scope12_year_columns = [
+        col
+        for col in df.columns
+        if isinstance(col, str)
+        and col.endswith("_scope12")
+        and not col.startswith("trend_")
+    ]
+    scope12_years = []
+    for col in scope12_year_columns:
+        year_str = col.split("_")[0]
+        if year_str.isdigit() and int(year_str) >= cutoff_year:
+            scope12_years.append(int(year_str))
 
-    # Create structure for new columns (both total and scope 1+2 trends)
+    scope12_years = sorted(scope12_years) if scope12_years else []
+
+    # Initialize new columns data with slope columns only
     new_columns_data = {}
-    for year in years_trend:
-        new_columns_data[f"trend_{int(year)}"] = [None] * len(df)
-        new_columns_data[f"trend_{int(year)}_scope12"] = [None] * len(df)
     new_columns_data["emission_slope"] = [None] * len(df)
     new_columns_data["emission_slope_scope12"] = [None] * len(df)
 
@@ -228,67 +238,103 @@ def calculate_company_emissions_trends(df, end_year=2030, cutoff_year=2015):
         # Skip companies with insufficient data points for regression
         if len(emissions_data) < 2:
             # Fill with NaN for companies without sufficient data
-            for year in years_trend:
-                column_name = f"trend_{int(year)}"
-                new_columns_data[column_name][idx] = None
             new_columns_data["emission_slope"][idx] = None
-            continue
+        else:
+            # Convert to numpy arrays
+            emissions_array = np.array(emissions_data, dtype=float)
+            years_array = np.array(years_data, dtype=float)
 
-        # Convert to numpy arrays
-        emissions_array = np.array(emissions_data, dtype=float)
-        years_array = np.array(years_data, dtype=float)
+            try:
+                # Get company-specific last year with data
+                company_last_year = int(years_array[-1])
 
-        try:
-            # Center years at the last observed year for numerical stability
-            last_year = years_array[-1]
-            historical_years_centered = years_array - last_year
-            trend_years_centered = years_trend - last_year
+                # Generate trend years starting from company's last data year
+                company_years_trend = np.arange(
+                    company_last_year, end_year + 1, dtype=float
+                )
 
-            # Perform regression
-            preds_trend, emission_slope = perform_regression_and_predict_simplified(
-                emissions_array,
-                historical_years_centered,
-                trend_years_centered,
-            )
+                # Center years at the last observed year for numerical stability
+                historical_years_centered = years_array - company_last_year
+                trend_years_centered = company_years_trend - company_last_year
 
-            # Store trend data
-            for i, year in enumerate(years_trend):
-                column_name = f"trend_{int(year)}"
-                new_columns_data[column_name][idx] = preds_trend[i]
+                # Perform regression
+                preds_trend, emission_slope = perform_regression_and_predict_simplified(
+                    emissions_array,
+                    historical_years_centered,
+                    trend_years_centered,
+                )
 
-            new_columns_data["emission_slope"][idx] = emission_slope
+                # Store trend data - only for years from company's last data year onwards
+                for i, year in enumerate(company_years_trend):
+                    column_name = f"trend_{int(year)}"
+                    # Initialize column if it doesn't exist
+                    if column_name not in new_columns_data:
+                        new_columns_data[column_name] = [None] * len(df)
 
-        except (ValueError, np.linalg.LinAlgError, RuntimeError) as e:
-            print(f"Error processing company {df.iloc[idx]['company_name']}: {str(e)}")
-            # Fill with NaN for companies with errors
-            for year in years_trend:
-                column_name = f"trend_{int(year)}"
-                new_columns_data[column_name][idx] = None
-            new_columns_data["emission_slope"][idx] = None
+                    # For the last historical year, use the actual historical value
+                    if year == company_last_year:
+                        new_columns_data[column_name][idx] = emissions_array[-1]
+                    else:
+                        new_columns_data[column_name][idx] = preds_trend[i]
+
+                new_columns_data["emission_slope"][idx] = emission_slope
+
+            except (ValueError, np.linalg.LinAlgError, RuntimeError) as e:
+                print(
+                    f"Error processing company {df.iloc[idx]['company_name']}: {str(e)}"
+                )
+                # Fill with NaN for companies with errors
+                new_columns_data["emission_slope"][idx] = None
 
         # Process scope 1+2 emissions
         scope12_emissions_data = []
         scope12_years_data = []
-        for year in years:
+
+        # Debug output for first few companies
+        company_name = df.iloc[idx].get("company_name", "Unknown")
+        debug_company = idx < 3  # Debug first 3 companies
+
+        # Use the actual scope1+2 years available for this analysis
+        for year in scope12_years:
             if year < effective_cutoff:
                 continue
             scope12_col = f"{year}_scope12"
             if scope12_col in df.columns:
                 scope12_value = df.iloc[idx][scope12_col]
+                if debug_company:
+                    print(
+                        f"Company {company_name}, year {year}: {scope12_col} = {scope12_value}"
+                    )
                 if pd.notna(scope12_value) and scope12_value is not None:
                     scope12_emissions_data.append(float(scope12_value))
                     scope12_years_data.append(year)
 
+        if debug_company:
+            print(
+                f"Company {company_name}: Found {len(scope12_emissions_data)} scope1+2 data points"
+            )
+            print(f"  Data: {list(zip(scope12_years_data, scope12_emissions_data))}")
+
         # Calculate trends for scope 1+2 emissions
         if scope12_emissions_data and len(scope12_emissions_data) >= 2:
+            if debug_company:
+                print(f"  Calculating scope1+2 trends for {company_name}")
             try:
                 scope12_emissions_array = np.array(scope12_emissions_data, dtype=float)
                 scope12_years_array = np.array(scope12_years_data, dtype=float)
-                last_year_scope12 = scope12_years_array[-1]
-                historical_years_centered_scope12 = (
-                    scope12_years_array - last_year_scope12
+                company_last_year_scope12 = int(scope12_years_array[-1])
+
+                # Generate scope12 trend years starting from company's last scope12 data year
+                company_scope12_years_trend = np.arange(
+                    company_last_year_scope12, end_year + 1, dtype=float
                 )
-                trend_years_centered_scope12 = years_trend - last_year_scope12
+
+                historical_years_centered_scope12 = (
+                    scope12_years_array - company_last_year_scope12
+                )
+                trend_years_centered_scope12 = (
+                    company_scope12_years_trend - company_last_year_scope12
+                )
 
                 preds_trend_scope12, emission_slope_scope12 = (
                     perform_regression_and_predict_simplified(
@@ -298,33 +344,42 @@ def calculate_company_emissions_trends(df, end_year=2030, cutoff_year=2015):
                     )
                 )
 
-                for i, year in enumerate(years_trend):
+                for i, year in enumerate(company_scope12_years_trend):
                     column_name = f"trend_{int(year)}_scope12"
-                    new_columns_data[column_name][idx] = preds_trend_scope12[i]
+                    # Initialize column if it doesn't exist
+                    if column_name not in new_columns_data:
+                        new_columns_data[column_name] = [None] * len(df)
+
+                    # For the last historical year, use the actual historical value
+                    if year == company_last_year_scope12:
+                        new_columns_data[column_name][idx] = scope12_emissions_array[-1]
+                    else:
+                        new_columns_data[column_name][idx] = preds_trend_scope12[i]
                 new_columns_data["emission_slope_scope12"][idx] = emission_slope_scope12
+
+                if debug_company:
+                    print(
+                        f"  Successfully calculated scope1+2 trends with slope: {emission_slope_scope12}"
+                    )
 
             except (ValueError, np.linalg.LinAlgError, RuntimeError) as e:
                 print(
                     f"Error processing scope 1+2 emissions for company {df.iloc[idx]['company_name']}: {str(e)}"
                 )
-                for year in years_trend:
-                    column_name = f"trend_{int(year)}_scope12"
-                    new_columns_data[column_name][idx] = None
                 new_columns_data["emission_slope_scope12"][idx] = None
         else:
-            for year in years_trend:
-                column_name = f"trend_{int(year)}_scope12"
-                new_columns_data[column_name][idx] = None
+            if debug_company and len(scope12_emissions_data) > 0:
+                print(
+                    f"  Company {company_name} has only {len(scope12_emissions_data)} scope1+2 data points - insufficient for trend calculation"
+                )
             new_columns_data["emission_slope_scope12"][idx] = None
 
     # Create new columns DataFrame and concatenate with original
     new_columns_df = pd.DataFrame(new_columns_data)
 
-    trend_cols = [f"trend_{int(year)}" for year in years_trend]
-    scope12_trend_cols = [f"trend_{int(year)}_scope12" for year in years_trend]
-    floored_future_trend_df = apply_zero_floor(
-        new_columns_df, trend_cols + scope12_trend_cols
-    )
+    # Apply zero floor to all trend columns
+    trend_cols = [col for col in new_columns_df.columns if col.startswith("trend_")]
+    floored_future_trend_df = apply_zero_floor(new_columns_df, trend_cols)
 
     return pd.concat([df, floored_future_trend_df], axis=1)
 
@@ -420,13 +475,51 @@ def main():
             print(f"Companies with increasing emissions: {(slopes > 0).sum()}")
             print(f"Companies with decreasing emissions: {(slopes < 0).sum()}")
 
+        # Check scope1+2 statistics
+        slope_col_scope12 = "emission_slope_scope12"
+        if slope_col_scope12 in trends_df.columns:
+            slopes_scope12 = trends_df[slope_col_scope12].dropna()
+            print("\nScope 1+2 Statistics:")
+            print(f"Companies with scope 1+2 trends: {len(slopes_scope12)}")
+            if len(slopes_scope12) > 0:
+                print(
+                    f"Average scope 1+2 slope: {slopes_scope12.mean():.2f} tCO2e/year"
+                )
+                print(
+                    f"Median scope 1+2 slope: {slopes_scope12.median():.2f} tCO2e/year"
+                )
+                print(
+                    f"Companies with increasing scope 1+2 emissions: {(slopes_scope12 > 0).sum()}"
+                )
+                print(
+                    f"Companies with decreasing scope 1+2 emissions: {(slopes_scope12 < 0).sum()}"
+                )
+
+        # Check how many companies have scope1+2 data
+        scope12_cols = [
+            col
+            for col in trends_df.columns
+            if "_scope12" in str(col) and not col.startswith("trend_")
+        ]
+        if scope12_cols:
+            companies_with_scope12 = 0
+            for _, row in trends_df.iterrows():
+                has_scope12_data = any(
+                    pd.notna(row[col]) and row[col] is not None for col in scope12_cols
+                )
+                if has_scope12_data:
+                    companies_with_scope12 += 1
+            print(f"Companies with any scope 1+2 data: {companies_with_scope12}")
+
         # Show sample of results
-        print(f"\nSample results (first 5 companies):")
+        print("\nSample results (first 5 companies):")
         display_cols = ["company_name"] + [
             col for col in trends_df.columns if "trend_" in str(col)
         ][:5]
         if "emission_slope" in trends_df.columns:
             display_cols.append("emission_slope")
+        if "emission_slope_scope12" in trends_df.columns:
+            display_cols.append("emission_slope_scope12")
         print(trends_df[display_cols].head())
 
     except (ValueError, KeyError, TypeError) as e:

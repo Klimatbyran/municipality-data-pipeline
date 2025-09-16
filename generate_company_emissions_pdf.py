@@ -2,7 +2,6 @@ import json
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.backends.backend_pdf as pdf_backend
-import numpy as np
 
 
 def load_company_trends_data(json_file_path):
@@ -41,10 +40,12 @@ def extract_emissions_and_trends(company_row):
             if pd.notna(value) and value is not None:
                 historical_data[year] = value
         elif isinstance(col, str) and col.startswith("trend_"):
-            year = int(col.split("_")[1])
-            value = company_row[col]
-            if pd.notna(value) and value is not None:
-                trend_data[year] = value
+            # Fix: Only process total emissions trends, not scope 1+2 trends
+            if not col.endswith("_scope12"):
+                year = int(col.split("_")[1])
+                value = company_row[col]
+                if pd.notna(value) and value is not None:
+                    trend_data[year] = value
 
     # Sort by year
     historical_years = sorted(historical_data.keys())
@@ -76,19 +77,25 @@ def extract_scope12_emissions_and_trends(company_row):
             and col.endswith("_scope12")
             and not col.startswith("trend_")
         ):
-            year = int(col.split("_")[0])
-            value = company_row[col]
-            if pd.notna(value) and value is not None:
-                historical_data[year] = value
+            year_str = col.split("_")[0]
+            # Check if the first part is actually a year (numeric and reasonable range)
+            if year_str.isdigit() and 1900 <= int(year_str) <= 2100:
+                year = int(year_str)
+                value = company_row[col]
+                if pd.notna(value) and value is not None:
+                    historical_data[year] = value
         elif (
             isinstance(col, str)
             and col.startswith("trend_")
             and col.endswith("_scope12")
         ):
-            year = int(col.split("_")[1])
-            value = company_row[col]
-            if pd.notna(value) and value is not None:
-                trend_data[year] = value
+            year_str = col.split("_")[1]
+            # Add similar check for trend columns
+            if year_str.isdigit() and 1900 <= int(year_str) <= 2100:
+                year = int(year_str)
+                value = company_row[col]
+                if pd.notna(value) and value is not None:
+                    trend_data[year] = value
 
     # Sort by year
     historical_years = sorted(historical_data.keys())
@@ -130,7 +137,6 @@ def create_company_emissions_plot(company_row, ax):
             transform=ax.transAxes,
             fontsize=12,
         )
-        ax.set_title(company_name, fontsize=14, fontweight="bold")
         return
 
     # Plot historical emissions
@@ -175,7 +181,6 @@ def create_company_emissions_plot(company_row, ax):
         )
 
     # Formatting
-    ax.set_title(company_name, fontsize=14, fontweight="bold", pad=20)
     ax.set_xlabel("Year", fontsize=11)
     ax.set_ylabel("Emissions (tCO2e)", fontsize=11)
     ax.grid(True, alpha=0.3)
@@ -184,43 +189,21 @@ def create_company_emissions_plot(company_row, ax):
     # Format y-axis to show thousands separators
     ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f"{x:,.0f}"))
 
+    # Set x-axis range from first year with data to 2030
+    all_years = hist_years + trend_years
+    if all_years:
+        first_year = min(all_years)
+        ax.set_xlim(first_year, 2030)
+
     if all_emissions := hist_emissions + trend_emissions:
         y_min = min(all_emissions)
         y_max = max(all_emissions)
         y_range = y_max - y_min
         if y_range > 0:
-            ax.set_ylim(max(0, y_min - 0.1 * y_range), y_max + 0.1 * y_range)
+            ax.set_ylim(0, y_max + 0.1 * y_range)
         else:
             # Handle case where all values are the same
-            ax.set_ylim(max(0, y_min - 0.1 * abs(y_min)), y_max + 0.1 * abs(y_max))
-
-    # Get emission slope for additional info and add base year info
-    slope = company_row.get("emission_slope")
-    info_text_lines = []
-
-    if pd.notna(slope):
-        trend_text = (
-            "↗ Increasing" if slope > 0 else "↘ Decreasing" if slope < 0 else "→ Stable"
-        )
-        info_text_lines.extend(
-            (f"Trend: {trend_text}", f"Slope: {slope:,.0f} tCO2e/year")
-        )
-    if base_year:
-        if base_year in hist_years:
-            info_text_lines.append(f"Base Year: {base_year} ✓")
-        else:
-            info_text_lines.append(f"Base Year: {base_year} (no data)")
-
-    if info_text_lines:
-        ax.text(
-            0.02,
-            0.98,
-            "\n".join(info_text_lines),
-            transform=ax.transAxes,
-            fontsize=9,
-            verticalalignment="top",
-            bbox=dict(boxstyle="round,pad=0.3", facecolor="lightgray", alpha=0.8),
-        )
+            ax.set_ylim(0, y_max + 0.1 * abs(y_max))
 
 
 def create_scope12_emissions_plot(company_row, ax):
@@ -245,7 +228,7 @@ def create_scope12_emissions_plot(company_row, ax):
         ax.text(
             0.5,
             0.5,
-            f"No Scope 1+2 data available",
+            "No Scope 1+2 data available",
             ha="center",
             va="center",
             transform=ax.transAxes,
@@ -296,7 +279,6 @@ def create_scope12_emissions_plot(company_row, ax):
         )
 
     # Formatting
-    ax.set_title("Scope 1+2 Emissions", fontsize=14, fontweight="bold", pad=20)
     ax.set_xlabel("Year", fontsize=11)
     ax.set_ylabel("Scope 1+2 Emissions (tCO2e)", fontsize=11)
     ax.grid(True, alpha=0.3)
@@ -305,38 +287,19 @@ def create_scope12_emissions_plot(company_row, ax):
     # Format y-axis to show thousands separators
     ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f"{x:,.0f}"))
 
+    if all_years := hist_years + trend_years:
+        first_year = min(all_years)
+        ax.set_xlim(first_year, 2030)
+
     if all_emissions := hist_emissions + trend_emissions:
         y_min = min(all_emissions)
         y_max = max(all_emissions)
         y_range = y_max - y_min
         if y_range > 0:
-            ax.set_ylim(max(0, y_min - 0.1 * y_range), y_max + 0.1 * y_range)
+            ax.set_ylim(0, y_max + 0.1 * y_range)
         else:
             # Handle case where all values are the same
-            ax.set_ylim(max(0, y_min - 0.1 * abs(y_min)), y_max + 0.1 * abs(y_max))
-
-    # Get emission slope for additional info
-    slope = company_row.get("emission_slope_scope12")
-    info_text_lines = []
-
-    if pd.notna(slope):
-        trend_text = (
-            "↗ Increasing" if slope > 0 else "↘ Decreasing" if slope < 0 else "→ Stable"
-        )
-        info_text_lines.extend(
-            (f"Trend: {trend_text}", f"Slope: {slope:,.0f} tCO2e/year")
-        )
-
-    if info_text_lines:
-        ax.text(
-            0.02,
-            0.98,
-            "\n".join(info_text_lines),
-            transform=ax.transAxes,
-            fontsize=9,
-            verticalalignment="top",
-            bbox=dict(boxstyle="round,pad=0.3", facecolor="lightgreen", alpha=0.8),
-        )
+            ax.set_ylim(0, y_max + 0.1 * abs(y_max))
 
 
 def generate_company_emissions_pdf(
