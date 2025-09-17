@@ -7,7 +7,6 @@ import statsmodels.api as sm
 
 from kpis.emissions.trend_calculations import (
     extract_year_columns,
-    apply_zero_floor,
 )
 
 
@@ -265,6 +264,7 @@ def calculate_company_emissions_trends(df, end_year=2030, cutoff_year=2015):
                 )
 
                 # Store trend data - only for years from company's last data year onwards
+                # Stop naturally when trend hits zero
                 for i, year in enumerate(company_years_trend):
                     column_name = f"trend_{int(year)}"
                     # Initialize column if it doesn't exist
@@ -273,9 +273,11 @@ def calculate_company_emissions_trends(df, end_year=2030, cutoff_year=2015):
 
                     # For the last historical year, use the actual historical value
                     if year == company_last_year:
-                        new_columns_data[column_name][idx] = emissions_array[-1]
+                        predicted_value = emissions_array[-1]
                     else:
-                        new_columns_data[column_name][idx] = preds_trend[i]
+                        predicted_value = preds_trend[i]
+
+                    new_columns_data[column_name][idx] = predicted_value
 
                 new_columns_data["emission_slope"][idx] = emission_slope
 
@@ -368,7 +370,7 @@ def calculate_company_emissions_trends(df, end_year=2030, cutoff_year=2015):
                 )
                 new_columns_data["emission_slope_scope12"][idx] = None
         else:
-            if debug_company and len(scope12_emissions_data) > 0:
+            if debug_company and scope12_emissions_data:
                 print(
                     f"  Company {company_name} has only {len(scope12_emissions_data)} scope1+2 data points - insufficient for trend calculation"
                 )
@@ -377,11 +379,7 @@ def calculate_company_emissions_trends(df, end_year=2030, cutoff_year=2015):
     # Create new columns DataFrame and concatenate with original
     new_columns_df = pd.DataFrame(new_columns_data)
 
-    # Apply zero floor to all trend columns
-    trend_cols = [col for col in new_columns_df.columns if col.startswith("trend_")]
-    floored_future_trend_df = apply_zero_floor(new_columns_df, trend_cols)
-
-    return pd.concat([df, floored_future_trend_df], axis=1)
+    return pd.concat([df, new_columns_df], axis=1)
 
 
 def perform_regression_and_predict_simplified(
