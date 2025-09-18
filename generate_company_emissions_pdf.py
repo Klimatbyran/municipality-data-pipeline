@@ -189,9 +189,7 @@ def create_company_emissions_plot(company_row, ax):
     # Format y-axis to show thousands separators
     ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f"{x:,.0f}"))
 
-    # Set x-axis range from first year with data to 2030
-    all_years = hist_years + trend_years
-    if all_years:
+    if all_years := hist_years + trend_years:
         first_year = min(all_years)
         ax.set_xlim(first_year, 2030)
 
