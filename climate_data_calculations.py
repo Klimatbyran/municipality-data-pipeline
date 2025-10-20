@@ -88,9 +88,7 @@ def series_to_dict(
     A dictionary with the transformed data.
     """
 
-
     coat_of_arms_url = get_coat_of_arms(row["Kommun"])
-    print(coat_of_arms_url)
     
     return {
         "name": row["Kommun"],
