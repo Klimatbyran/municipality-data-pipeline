@@ -6,6 +6,9 @@ from typing import Any, Dict, List
 
 import pandas as pd
 
+from facts.coatOfArms.coat_of_arms import get_coat_of_arms
+from facts.coatOfArms.coat_of_arms import get_municipality_wikiId
+
 from facts.municipalities_counties import get_municipalities
 from facts.political.political_rule import get_political_rule
 from kpis.bicycles.bicycle_data_calculations import calculate_bike_lane_per_capita
@@ -20,7 +23,6 @@ from kpis.procurements.climate_requirements_in_procurements import get_procureme
 
 # Notebook from ClimateView that our calculations are based on:
 # https://colab.research.google.com/drive/1qqMbdBTu5ulAPUe-0CRBmFuh8aNOiHEb?usp=sharing
-
 
 def create_dataframe(to_percentage: bool) -> pd.DataFrame:
     """Create a comprehensive climate dataframe by merging multiple data sources"""
@@ -68,6 +70,8 @@ def create_dataframe(to_percentage: bool) -> pd.DataFrame:
     return result_df.sort_values(by="Kommun").reset_index(drop=True)
 
 
+
+
 def series_to_dict(
     row: pd.Series,
     historical_columns: List[Any],
@@ -84,8 +88,13 @@ def series_to_dict(
     A dictionary with the transformed data.
     """
 
+
+    coat_of_arms_url = get_coat_of_arms(row["Kommun"])
+    print(coat_of_arms_url)
+    
     return {
         "name": row["Kommun"],
+        "coatOfArmsUrl": coat_of_arms_url,
         "region": row["Län"],
         "emissions": {str(year): row[year] for year in historical_columns},
         "meetsParisGoal": bool(row["meetsParisGoal"]),
