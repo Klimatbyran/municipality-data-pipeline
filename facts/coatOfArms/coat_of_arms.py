@@ -60,7 +60,6 @@ def get_coat_of_arms(municipalityName):
     return coatOfArmsUrl
 
 
-
 def get_municipality_wikiId(municipalityName):
     url = "https://www.wikidata.org/w/api.php"
 
