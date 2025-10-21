@@ -92,7 +92,7 @@ def series_to_dict(
     
     return {
         "name": row["Kommun"],
-        "coatOfArmsUrl": coat_of_arms_url,
+        "logoUrl": coat_of_arms_url,
         "region": row["Län"],
         "emissions": {str(year): row[year] for year in historical_columns},
         "meetsParisGoal": bool(row["meetsParisGoal"]),
