@@ -71,7 +71,6 @@ def create_dataframe(to_percentage: bool) -> pd.DataFrame:
 
 
 
-
 def series_to_dict(
     row: pd.Series,
     historical_columns: List[Any],
