@@ -70,7 +70,6 @@ def create_dataframe(to_percentage: bool) -> pd.DataFrame:
     return result_df.sort_values(by="Kommun").reset_index(drop=True)
 
 
-
 def series_to_dict(
     row: pd.Series,
     historical_columns: List[Any],
