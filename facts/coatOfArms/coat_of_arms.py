@@ -3,7 +3,6 @@ import requests
 import json 
 from urllib.parse import quote
 
-
 """ Måste skapa en check som först kollar t.ex "bollnäs" wikiId om den inte har en coat of arms, kolla bollnäs municipality-wikiId. M """
 
 
