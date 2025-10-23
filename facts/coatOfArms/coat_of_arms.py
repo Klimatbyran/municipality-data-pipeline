@@ -2,16 +2,28 @@ import requests
 import json 
 from urllib.parse import quote
 
-""" Måste skapa en check som först kollar t.ex "bollnäs" wikiId om den inte har en coat of arms, kolla bollnäs municipality-wikiId. M """
 
 
-def get_coat_of_arms(municipalityName):
-    wikiIDs = get_municipality_wikiId(municipalityName)
+def get_coat_of_arms(municipality_name):
+
+ """ Retrieve coat of arms URL for a given municipality.
+    
+    Searches for municipality in Wikidata and retrieves the coat of arms image URL
+    from either P94 (coat of arms image) or P154 (logo image) properties.
+    
+    Args:
+        municipality_name (str): Name of the municipality to search for
+        
+    Returns:
+        Optional[str]: URL to coat of arms image, or None if not found """
+
+
+    wiki_ids = get_municipality_wikiId(municipality_name)
     
     headers = {"User-Agent": "KlimatkollenFetcher/1.0 (contact: hej@klimatkollen.se)"}
-    coatOfArmsUrl = None
+    coat_of_arms_url = None
    
-    for id in wikiIDs:
+    for id in wiki_ids:
         url = f'https://www.wikidata.org/w/api.php?action=wbgetentities&ids={id}&props=claims&format=json'
         res = requests.get(url, headers=headers) 
  
@@ -35,7 +47,7 @@ def get_coat_of_arms(municipalityName):
                 if filename and isinstance(filename, str):
                     print(filename)
                     url = f"https://commons.wikimedia.org/wiki/Special:FilePath/{quote(filename)}"
-                    coatOfArmsUrl = url
+                    coat_of_arms_url = url
 
             else:
                 print("No P94 exists, trying P154...")
@@ -49,7 +61,7 @@ def get_coat_of_arms(municipalityName):
                     
                     if filename and isinstance(filename, str):
                         url = f"https://commons.wikimedia.org/wiki/Special:FilePath/{quote(filename)}"
-                        coatOfArmsUrl = url
+                        coat_of_arms_url = url
 
                 else:
                     print("No P154 exists")
@@ -57,15 +69,15 @@ def get_coat_of_arms(municipalityName):
         except ValueError:
             print("Could not parse response to JSON")
             return
-    return coatOfArmsUrl
+    return coat_of_arms_url
 
 
-def get_municipality_wikiId(municipalityName):
+def get_municipality_wikiId(municipality_name):
     url = "https://www.wikidata.org/w/api.php"
 
     params = {
         "action": "wbsearchentities",
-        "search": municipalityName,
+        "search": municipality_name,
         "language": "sv",
         "format": "json"
     }
@@ -78,18 +90,18 @@ def get_municipality_wikiId(municipalityName):
     
     try:
         response = res.json()
-        searchResults = response["search"]
-        wikiIDs = []
-        wikiIDs.append(searchResults[0].get("id"))
+        search_results = response["search"]
+        wiki_ids = []
+        wiki_ids.append(search_results[0].get("id"))
         
     
-        if len(searchResults) > 1:
-            for municipality in searchResults:
-                if municipalityName + " Municipality" in municipality["label"]:
-                    validID = municipality.get("id")
-                    if validID not in wikiIDs:
-                        wikiIDs.append(municipality.get("id"))
-        return wikiIDs
+        if len(search_results) > 1:
+            for municipality in search_results:
+                if municipality_name + " Municipality" in municipality["label"]:
+                    valid_id = municipality.get("id")
+                    if valid_id not in wiki_ids:
+                        wiki_ids.append(municipality.get("id"))
+        return wiki_ids
 
     except ValueError:
         print("Could not find valid wikiId")
