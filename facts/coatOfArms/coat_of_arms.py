@@ -1,9 +1,6 @@
-
 import requests
 import json 
 from urllib.parse import quote
-
-
 
 """ Måste skapa en check som först kollar t.ex "bollnäs" wikiId om den inte har en coat of arms, kolla bollnäs municipality-wikiId. M """
 
@@ -61,7 +58,6 @@ def get_coat_of_arms(municipalityName):
             print("Could not parse response to JSON")
             return
     return coatOfArmsUrl
-
 
 
 def get_municipality_wikiId(municipalityName):

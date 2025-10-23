@@ -8,7 +8,6 @@ import pandas as pd
 
 from facts.coatOfArms.coat_of_arms import get_coat_of_arms
 from facts.coatOfArms.coat_of_arms import get_municipality_wikiId
-
 from facts.municipalities_counties import get_municipalities
 from facts.political.political_rule import get_political_rule
 from kpis.bicycles.bicycle_data_calculations import calculate_bike_lane_per_capita
@@ -68,8 +67,6 @@ def create_dataframe(to_percentage: bool) -> pd.DataFrame:
     print("9. Political rule added")
 
     return result_df.sort_values(by="Kommun").reset_index(drop=True)
-
-
 
 
 def series_to_dict(
