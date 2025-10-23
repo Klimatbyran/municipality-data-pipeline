@@ -36,6 +36,7 @@ def get_coat_of_arms(municipalityName):
                         break
                 
                 if filename and isinstance(filename, str):
+                    print(filename)
                     url = f"https://commons.wikimedia.org/wiki/Special:FilePath/{quote(filename)}"
                     coatOfArmsUrl = url
 
