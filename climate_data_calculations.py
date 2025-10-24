@@ -92,7 +92,8 @@ def series_to_dict(
         "logoUrl": coat_of_arms_url,
         "region": row["Län"],
         "emissions": {str(year): row[year] for year in historical_columns},
-        "meetsParisGoal": bool(row["meetsParisGoal"]),
+        "totalTrend": row["totalTrend"],
+        "totalCarbonLaw": row["totalCarbonLawPath"],
         "approximatedHistoricalEmission": {
             year.replace("approximated_", ""): row[year]
             for year in approximated_columns
