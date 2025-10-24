@@ -5,8 +5,8 @@ from urllib.parse import quote
 
 
 def get_coat_of_arms(municipality_name):
-
- """ Retrieve coat of arms URL for a given municipality.
+    
+    """ Retrieve coat of arms URL for a given municipality.
     
     Searches for municipality in Wikidata and retrieves the coat of arms image URL
     from either P94 (coat of arms image) or P154 (logo image) properties.
@@ -15,10 +15,15 @@ def get_coat_of_arms(municipality_name):
         municipality_name (str): Name of the municipality to search for
         
     Returns:
-        Optional[str]: URL to coat of arms image, or None if not found """
+        Optional[str]: URL to coat of arms image, or None if not found 
+    """
 
 
     wiki_ids = get_municipality_wikiId(municipality_name)
+
+    if not wiki_ids: 
+        return None
+   
     
     headers = {"User-Agent": "KlimatkollenFetcher/1.0 (contact: hej@klimatkollen.se)"}
     coat_of_arms_url = None
@@ -41,12 +46,12 @@ def get_coat_of_arms(municipality_name):
                 for statement in p94:
                     snak = statement.get("mainsnak",{})
                     if "datavalue" in snak:
-                        filename = snak["datavalue"]["value"]
+                        filename = snak["datavalue"]["value"].replace(" ", "_")
                         break
                 
                 if filename and isinstance(filename, str):
                     print(filename)
-                    url = f"https://commons.wikimedia.org/wiki/Special:FilePath/{quote(filename)}"
+                    url = f"https://commons.wikimedia.org/wiki/Special:Redirect/file/{quote(filename)}"
                     coat_of_arms_url = url
 
             else:
@@ -56,11 +61,11 @@ def get_coat_of_arms(municipality_name):
                     for statement in p154:
                         snak = statement.get("mainsnak",{})
                         if "datavalue" in snak:
-                            filename = snak["datavalue"]["value"]
+                            filename = snak["datavalue"]["value"].replace(" ", "_")
                             break
                     
                     if filename and isinstance(filename, str):
-                        url = f"https://commons.wikimedia.org/wiki/Special:FilePath/{quote(filename)}"
+                        url = f"https://commons.wikimedia.org/wiki/Special:Redirect/file/{quote(filename)}"
                         coat_of_arms_url = url
 
                 else:
@@ -69,6 +74,7 @@ def get_coat_of_arms(municipality_name):
         except ValueError:
             print("Could not parse response to JSON")
             return
+    print(coat_of_arms_url)
     return coat_of_arms_url
 
 
