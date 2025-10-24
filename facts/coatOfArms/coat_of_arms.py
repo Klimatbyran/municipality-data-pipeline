@@ -52,7 +52,8 @@ def get_coat_of_arms(municipality_name):
                 if filename and isinstance(filename, str):
                     print(filename)
                     url = f"https://commons.wikimedia.org/wiki/Special:Redirect/file/{quote(filename)}"
-                    coat_of_arms_url = url
+                    res = requests.get(url, headers=headers, allow_redirects=True) 
+                    coat_of_arms_url = res.url
 
             else:
                 print("No P94 exists, trying P154...")
@@ -66,7 +67,8 @@ def get_coat_of_arms(municipality_name):
                     
                     if filename and isinstance(filename, str):
                         url = f"https://commons.wikimedia.org/wiki/Special:Redirect/file/{quote(filename)}"
-                        coat_of_arms_url = url
+                        res = requests.get(url, headers=headers, allow_redirects=True) 
+                        coat_of_arms_url = res.url
 
                 else:
                     print("No P154 exists")
