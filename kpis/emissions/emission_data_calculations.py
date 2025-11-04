@@ -165,8 +165,10 @@ def emission_calculations(df):
         df_trend_and_approximated, LAST_YEAR_WITH_SMHI_DATA
     )
 
+    df_hit_net_zero = calculate_hit_net_zero(df_historical_change_percent, LAST_YEAR_WITH_SMHI_DATA)
+
     df_carbon_law = calculate_carbon_law_total(
-        df_historical_change_percent,
+        df_hit_net_zero,
         CURRENT_YEAR,
         END_YEAR,
         CARBON_LAW_REDUCTION_RATE,
