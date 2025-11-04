@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-
+from dateutil.relativedelta import relativedelta
 import numpy as np
 
 from kpis.emissions.cement_deductions import CEMENT_DEDUCTION_VALUES
@@ -12,6 +12,7 @@ from kpis.emissions.carbon_law_calculations import calculate_carbon_law_total
 
 
 CURRENT_YEAR = datetime.now().year  # current year
+YEAR_SECONDS = 60 * 60 * 24 * 365   # a year in seconds
 LAST_YEAR_WITH_SMHI_DATA = (
     2023  # last year for which the National Emission database has data
 )
@@ -86,6 +87,48 @@ def calculate_historical_change_percent(df, last_year_in_range):
 
     df["historicalEmissionChangePercent"] = temp
 
+    return df
+
+
+def calculate_hit_net_zero(df, last_year_in_range):
+    """
+    Calculates the date and year for when each municipality hits net zero emissions (if so).
+    This is done by deriving where the linear trend line crosses the time axis.
+
+    Args:
+        df (pandas.DataFrame): The input DataFrame containing the emissions data.
+
+    Returns:
+        pandas.DataFrame: The input DataFrame with an additional column 'hitNetZero' that contains
+        the date when net zero emissions are reached for each municipality.
+    """
+
+    temp = []  # temporary list that we will append to
+    for i in range(len(df)):
+        last_year = last_year_in_range  # last year with recorded data
+        # Get trend line coefficients
+        fit = df.iloc[i]["trendCoefficients"]
+
+        if fit[0] < 0:  # If the slope is negative we will reach the x-axis
+            temp_f = -fit[1] / fit[0]  # Find where the line cross the x-axis
+            # Initiate the first day of our starting point date.
+            # Start at last_year+1 since the line can go up between last_year and last_year+1
+            my_date = datetime(int(last_year + 1), 1, 1, 0, 0, 0)
+            # Add the length between the starting date and the net zero date
+            # to the starting date to get the date when net zero is reached
+            temp.append(
+                (
+                    my_date
+                    + relativedelta(
+                        seconds=int((temp_f - int(last_year + 1)) * YEAR_SECONDS)
+                    )
+                ).date()
+            )
+
+        else:  # If the slope is not negative you will never reach net zero
+            temp.append(None)
+
+    df["hitNetZero"] = temp
     return df
 
 

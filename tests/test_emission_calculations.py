@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 import unittest
+import datetime
 import pandas as pd
 
 from kpis.emissions.emission_data_calculations import (
     calculate_historical_change_percent,
     deduct_cement,
+    calculate_hit_net_zero,
     calculate_meets_paris_goal,
     emission_calculations,
 )
@@ -100,6 +102,8 @@ class TestEmissionCalculations(unittest.TestCase):
         )
 
         pd.testing.assert_frame_equal(df_result, df_expected, check_exact=False)
+        
+
 
     def test_does_meets_paris_goal(self):
         """Test the meets Paris goal"""
@@ -119,6 +123,26 @@ class TestEmissionCalculations(unittest.TestCase):
         )
 
         pd.testing.assert_frame_equal(df_result, df_expected)
+
+    def test_calculate_hit_net_zero(self):
+        """Test the hit net zero"""
+        # Sample DataFrame for municipalitis 'Ale' and 'Alingsås'
+        df_input = pd.DataFrame(
+            {
+                "Kommun": ["Ale", "Alingsås"],
+                "trendCoefficients": [
+                    [7.82334178e02, -1.43894275e06],
+                    [-1.97662497e03, 4.06091905e06],
+                ],
+            }
+        )
+
+        df_expected = df_input.copy()
+        df_expected["hitNetZero"] = [None, datetime.date(2054, 6, 13)]
+
+        df_result = calculate_hit_net_zero(df_input, LAST_YEAR_WITH_SMHI_DATA)
+
+        pd.testing.assert_frame_equal(df_result, df_expected, check_exact=False)
 
     def test_does_not_meets_paris_goal(self):
         """Test the meets Paris goal"""
