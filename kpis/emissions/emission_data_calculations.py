@@ -4,6 +4,7 @@
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import numpy as np
+import pandas as pd
 
 from kpis.emissions.cement_deductions import CEMENT_DEDUCTION_VALUES
 from kpis.emissions.historical_data_calculations import get_n_prep_data_from_smhi
@@ -89,47 +90,47 @@ def calculate_historical_change_percent(df, last_year_in_range):
 
     return df
 
-
-def calculate_hit_net_zero(df, last_year_in_range):
+def calculate_hit_net_zero(input_df, current_year):
     """
     Calculates the date and year for when each municipality hits net zero emissions (if so).
     This is done by deriving where the linear trend line crosses the time axis.
 
     Args:
         df (pandas.DataFrame): The input DataFrame containing the emissions data.
+        current_year (int): Current year
 
     Returns:
-        pandas.DataFrame: The input DataFrame with an additional column 'hitNetZero' that contains
+        pandas.DataFrame: The input DataFrame with an additional column 'hit_net_zero' that contains
         the date when net zero emissions are reached for each municipality.
     """
+    dates = []
+    for i in range(len(input_df)):
+        slope = input_df.iloc[i]["trend_emissions_slope"]
 
-    temp = []  # temporary list that we will append to
-    for i in range(len(df)):
-        last_year = last_year_in_range  # last year with recorded data
-        # Get trend line coefficients
-        fit = df.iloc[i]["trendCoefficients"]
+        col_name = (
+            current_year
+            if current_year in input_df.columns
+            else f"approximated_{current_year}"
+        )
+        emissions_value_raw = input_df.iloc[i][col_name]
+        emissions_value = float(emissions_value_raw)
 
-        if fit[0] < 0:  # If the slope is negative we will reach the x-axis
-            temp_f = -fit[1] / fit[0]  # Find where the line cross the x-axis
-            # Initiate the first day of our starting point date.
-            # Start at last_year+1 since the line can go up between last_year and last_year+1
-            my_date = datetime(int(last_year + 1), 1, 1, 0, 0, 0)
-            # Add the length between the starting date and the net zero date
-            # to the starting date to get the date when net zero is reached
-            temp.append(
-                (
-                    my_date
-                    + relativedelta(
-                        seconds=int((temp_f - int(last_year + 1)) * YEAR_SECONDS)
-                    )
-                ).date()
-            )
+        if slope < 0:
+            # E(t) = E0 + slope*(t - y0) => t_cross = y0 - E0/slope
+            y0 = int(current_year)
+            t_cross = y0 - (emissions_value / slope)
 
-        else:  # If the slope is not negative you will never reach net zero
-            temp.append(None)
+            whole_year = int(t_cross)
+            frac = t_cross - whole_year
+            base_dt = datetime(whole_year, 1, 1)
+            date_cross = (base_dt + relativedelta(seconds=int(frac * YEAR_SECONDS))).date()
+            dates.append(date_cross)
+        else:
+            dates.append(None)
 
-    df["hitNetZero"] = temp
-    return df
+    df_out = input_df.copy()
+    df_out["hit_net_zero"] = dates
+    return df_out
 
 
 def calculate_meets_paris_goal(total_trend, total_carbon_law_path):
