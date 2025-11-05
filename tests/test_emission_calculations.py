@@ -102,8 +102,6 @@ class TestEmissionCalculations(unittest.TestCase):
         )
 
         pd.testing.assert_frame_equal(df_result, df_expected, check_exact=False)
-        
-
 
     def test_does_meets_paris_goal(self):
         """Test the meets Paris goal"""
@@ -126,21 +124,18 @@ class TestEmissionCalculations(unittest.TestCase):
 
     def test_calculate_hit_net_zero(self):
         """Test the hit net zero"""
-        # Sample DataFrame for municipalitis 'Ale' and 'Alingsås'
         df_input = pd.DataFrame(
             {
-                "Kommun": ["Ale", "Alingsås"],
-                "trendCoefficients": [
-                    [7.82334178e02, -1.43894275e06],
-                    [-1.97662497e03, 4.06091905e06],
-                ],
+                "Kommun": ["Ale", "Alingsås", "Gotland"],
+                "approximated_2024": [1, 2, 15],
+                "trend_emissions_slope": [1, -1, -5],
             }
         )
 
         df_expected = df_input.copy()
-        df_expected["hitNetZero"] = [None, datetime.date(2054, 6, 13)]
+        df_expected["hit_net_zero"] = [None, datetime.date(2026, 1, 1), datetime.date(2027, 1, 1)]
 
-        df_result = calculate_hit_net_zero(df_input, LAST_YEAR_WITH_SMHI_DATA)
+        df_result = calculate_hit_net_zero(df_input, CURRENT_YEAR)
 
         pd.testing.assert_frame_equal(df_result, df_expected, check_exact=False)
 
@@ -235,15 +230,16 @@ class TestEmissionCalculations(unittest.TestCase):
                 "trend_2048": [102716.03309],
                 "trend_2049": [101375.732317],
                 "trend_2050": [100035.431545],
-                "emission_slope": [-1340.30077],
-                "totalTrend": [3.036519e06],
+                "trend_emissions_slope": [-1340.30077],
+                "totalTrend": [3035178.670407],
                 "historicalEmissionChangePercent": [-1.347337],
+                "hit_net_zero": [datetime.date(2124, 8, 20)],
                 "totalCarbonLawPath": [1.094868e06],
                 "meetsParisGoal": [False],
             }
         )
 
-        df_result = emission_calculations(df_input)
+        df_result = round(emission_calculations(df_input), 6)
 
         pd.testing.assert_frame_equal(df_result, df_expected)
 
@@ -300,9 +296,10 @@ class TestEmissionCalculations(unittest.TestCase):
                 "trend_2048": [34249.850338],
                 "trend_2049": [33924.452239],
                 "trend_2050": [33599.054141],
-                "emission_slope": [-325.398099],
-                "totalTrend": [979329.78981],
+                "trend_emissions_slope": [-325.398099],
+                "totalTrend": [979004.391711],
                 "historicalEmissionChangePercent": [-0.610923],
+                "hit_net_zero": [datetime.date(2153, 4, 4)],
                 "totalCarbonLawPath": [342161.18693],
                 "meetsParisGoal": [False],
             }
