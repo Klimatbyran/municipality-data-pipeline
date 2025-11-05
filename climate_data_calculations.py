@@ -96,6 +96,7 @@ def series_to_dict(
         },
         "trend": {year.replace("trend_", ""): row[year] for year in trend_columns},
         "historicalEmissionChangePercent": row["historicalEmissionChangePercent"],
+        "hitNetZero": row["hit_net_zero"],
         "electricCarChangePercent": row["evChangeRate"],
         "climatePlanLink": row["Länk till aktuell klimatplan"],
         "climatePlanYear": row["Antagen år"],
