@@ -163,6 +163,28 @@ def extract_regional_total_emissions(input_df: pd.DataFrame) -> Dict:
     return regional_emissions
 
 
+def _process_regional_sector_data(input_df: pd.DataFrame, lan: str, sector: str,
+                                 regional_sector_emissions: Dict) -> None:
+    """Process emissions data for a specific sector and län."""
+    df_sector = input_df[
+        (input_df["Huvudsektor"] == sector)
+        & (input_df["Undersektor"] == "Alla")
+        & (input_df["Län"] == lan)
+        & (input_df["Kommun"] == "Alla")
+    ]
+
+    if df_sector.empty:
+        return
+
+    row = df_sector.iloc[0]
+    for col in df_sector.columns[4:]:
+        if pd.notna(row[col]):
+            year = str(col)
+            if year not in regional_sector_emissions[lan]:
+                regional_sector_emissions[lan][year] = {}
+            regional_sector_emissions[lan][year][sector] = round(float(row[col]), 2)
+
+
 def extract_regional_sector_emissions(input_df: pd.DataFrame) -> Dict:
     """
     Extract regional emissions data by main sectors and län.
@@ -181,26 +203,8 @@ def extract_regional_sector_emissions(input_df: pd.DataFrame) -> Dict:
 
     for lan in lans:
         regional_sector_emissions[lan] = {}
-        
         for sector in sectors:
-            # Filter for this sector and län (all subsectors)
-            df_sector = input_df[
-                (input_df["Huvudsektor"] == sector)
-                & (input_df["Undersektor"] == "Alla")
-                & (input_df["Län"] == lan)
-                & (input_df["Kommun"] == "Alla")
-            ]
-
-            if not df_sector.empty:
-                row = df_sector.iloc[0]
-
-                # Extract year data for this sector and län
-                for col in df_sector.columns[4:]:
-                    if pd.notna(row[col]):
-                        year = str(col)
-                        if year not in regional_sector_emissions[lan]:
-                            regional_sector_emissions[lan][year] = {}
-                        regional_sector_emissions[lan][year][sector] = round(float(row[col]), 2)
+            _process_regional_sector_data(input_df, lan, sector, regional_sector_emissions)
 
     return regional_sector_emissions
 
@@ -217,22 +221,24 @@ def extract_regional_subsector_emissions(input_df: pd.DataFrame) -> Dict:
     """
     sectors = set(input_df["Huvudsektor"]) - {"Alla"}
     lans = set(input_df["Län"]) - {"Alla"}
-    
+
     regional_subsector_emissions = {}
 
     for lan in lans:
         regional_subsector_emissions[lan] = {}
-        
+
         for sector in sectors:
             subsectors = set(input_df[input_df["Huvudsektor"] == sector]["Undersektor"]) - {"Alla"}
             for subsector in subsectors:
-                _process_regional_subsector_data(input_df, lan, sector, subsector, regional_subsector_emissions)
+                _process_regional_subsector_data(
+                    input_df, lan, sector, subsector, regional_subsector_emissions
+                    )
 
     return regional_subsector_emissions
 
 
-def _process_regional_subsector_data(input_df: pd.DataFrame, lan: str, sector: str, 
-                                   subsector: str, regional_subsector_emissions: Dict) -> None:
+def _process_regional_subsector_data(input_df: pd.DataFrame, lan: str, sector: str,
+                                    subsector: str, regional_subsector_emissions: Dict) -> None:
     """Process emissions data for a specific subsector and län."""
     df_subsector = input_df[
         (input_df["Huvudsektor"] == sector)
@@ -319,9 +325,9 @@ def create_regional_emissions_dict(input_df: pd.DataFrame) -> Dict:
     # Create the final structure
     regional_data = {}
 
-    for lan in total_emissions.keys():
+    for lan in total_emissions:
         regional_data[lan] = {}
-        
+
         # Get years for this län
         lan_years = set()
         lan_years.update(total_emissions.get(lan, {}).keys())
