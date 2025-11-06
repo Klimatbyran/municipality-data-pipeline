@@ -77,7 +77,7 @@ class TestTrendCalculations(unittest.TestCase):
                 "trend_2033": [None],
                 "trend_2034": [None],
                 "trend_2035": [None],
-                "emission_slope": [None],
+                "trend_emissions_slope": [None],
             },
         )
 
@@ -104,7 +104,7 @@ class TestTrendCalculations(unittest.TestCase):
 
         df_result = calculate_trend(DF_INPUT, CURRENT_YEAR, END_YEAR, CUTOFF_YEAR)
 
-        self.assertIn("emission_slope", df_result.columns)
+        self.assertIn("trend_emissions_slope", df_result.columns)
 
         self.assertTrue(
             all(col in df_result.columns for col in expected_trend),
