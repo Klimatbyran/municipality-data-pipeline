@@ -61,3 +61,50 @@ def get_n_prep_data_from_smhi(input_df):
     df_total = df_total.reset_index(drop=True)
 
     return input_df.merge(df_total, on="Kommun", how="left")
+
+def get_n_prep_regional_data_from_smhi():
+    """
+    Retrieves and prepares regional CO2 emission data from SMHI.
+
+    Returns:
+        pandas.DataFrame: The cleaned dataframe.
+    """
+
+    df_raw = get_smhi_data()
+
+    # Extract total emissions from the SMHI data
+    df_total = df_raw[
+        (df_raw["Huvudsektor"] == "Alla")
+        & (df_raw["Undersektor"] == "Alla")
+        & (df_raw["Län"] != "Alla")
+        & (df_raw["Kommun"] == "Alla")
+    ]
+    df_total = df_total.reset_index(drop=True)
+
+    # Collect municipalities per län
+    df_municipalities = df_raw[
+        (df_raw["Huvudsektor"] == "Alla")
+        & (df_raw["Undersektor"] == "Alla")
+        & (df_raw["Län"] != "Alla")
+        & (df_raw["Kommun"] != "Alla")
+    ][["Län", "Kommun"]].drop_duplicates()
+
+    kommun_per_lan = (
+        df_municipalities.groupby("Län")["Kommun"]
+        .apply(lambda kommuner: sorted(kommuner.unique()))
+        .reset_index()
+    )
+
+    # Remove categorical columns we no longer need
+    df_total = df_total.drop(columns=["Huvudsektor", "Undersektor", "Kommun"])
+
+    df_total = df_total.merge(
+        kommun_per_lan.rename(columns={"Kommun": "Kommun_list"}),
+        on="Län",
+        how="left",
+    )
+
+    df_total = df_total.rename(columns={"Kommun_list": "Kommun"})
+    df_total = df_total.sort_values(by=["Län"]).reset_index(drop=True)
+
+    return df_total
