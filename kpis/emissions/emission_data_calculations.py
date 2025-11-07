@@ -55,12 +55,14 @@ def deduct_cement(df, cement_deduction):
     return df_cem
 
 
-def calculate_historical_change_percent(df, last_year_in_range):
+def calculate_historical_change_percent(df, column_name, last_year_in_range):
     """
     Calculate the historical average emission level change based on SMHI data from 2015 onwards.
 
     Args:
         df (pandas.DataFrame): The input DataFrame containing emission data.
+        column_name (string): name of column to sort on
+        last_year_in_range (int): last year with data
 
     Returns:
         pandas.DataFrame: The input DataFrame with an additional column
@@ -69,7 +71,7 @@ def calculate_historical_change_percent(df, last_year_in_range):
     """
 
     temp = []
-    df = df.sort_values("Kommun", ascending=True)
+    df = df.sort_values(column_name, ascending=True)
     for i in range(len(df)):
         # Get the years we will use for the average
         years = np.arange(2015, last_year_in_range + 1)
@@ -119,7 +121,7 @@ def emission_calculations(df):
     )
 
     df_historical_change_percent = calculate_historical_change_percent(
-        df_trend_and_approximated, LAST_YEAR_WITH_SMHI_DATA
+        df_trend_and_approximated, "Kommun", LAST_YEAR_WITH_SMHI_DATA
     )
 
     df_carbon_law = calculate_carbon_law_total(

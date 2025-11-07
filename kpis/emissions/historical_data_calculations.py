@@ -99,12 +99,11 @@ def get_n_prep_regional_data_from_smhi():
     df_total = df_total.drop(columns=["Huvudsektor", "Undersektor", "Kommun"])
 
     df_total = df_total.merge(
-        kommun_per_lan.rename(columns={"Kommun": "Kommun_list"}),
+        kommun_per_lan.rename(columns={"Kommun": "municipalities"}),
         on="Län",
         how="left",
     )
 
-    df_total = df_total.rename(columns={"Kommun_list": "Kommun"})
     df_total = df_total.sort_values(by=["Län"]).reset_index(drop=True)
 
     return df_total

@@ -46,7 +46,7 @@ def regional_emission_calculations():
     )
 
     df_historical_change_percent = calculate_historical_change_percent(
-        df_trend_and_approximated, LAST_YEAR_WITH_SMHI_DATA
+        df_trend_and_approximated, "Län", LAST_YEAR_WITH_SMHI_DATA
     )
 
     df_carbon_law = calculate_carbon_law_total(
