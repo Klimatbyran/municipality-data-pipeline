@@ -96,7 +96,7 @@ class TestEmissionCalculations(unittest.TestCase):
         df_expected["historicalEmissionChangePercent"] = [-6.46746990789292]
 
         df_result = calculate_historical_change_percent(
-            df_input, LAST_YEAR_WITH_SMHI_DATA
+            df_input, "Kommun", LAST_YEAR_WITH_SMHI_DATA
         )
 
         pd.testing.assert_frame_equal(df_result, df_expected, check_exact=False)
