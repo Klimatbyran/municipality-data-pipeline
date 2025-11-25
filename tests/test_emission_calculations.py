@@ -107,7 +107,7 @@ class TestEmissionCalculations(unittest.TestCase):
         """Test the meets Paris goal"""
         df_input = pd.DataFrame(
             {
-                "totalTrend": [100],
+                "total_trend": [100],
                 "totalCarbonLawPath": [110],
             }
         )
@@ -117,7 +117,7 @@ class TestEmissionCalculations(unittest.TestCase):
 
         df_result = df_input.copy()
         df_result["meetsParisGoal"] = calculate_meets_paris_goal(
-            df_input["totalTrend"].iloc[0], df_input["totalCarbonLawPath"].iloc[0]
+            df_input["total_trend"].iloc[0], df_input["totalCarbonLawPath"].iloc[0]
         )
 
         pd.testing.assert_frame_equal(df_result, df_expected)
@@ -143,7 +143,7 @@ class TestEmissionCalculations(unittest.TestCase):
         """Test the meets Paris goal"""
         df_input = pd.DataFrame(
             {
-                "totalTrend": [120],
+                "total_trend": [120],
                 "totalCarbonLawPath": [110],
             }
         )
@@ -153,7 +153,7 @@ class TestEmissionCalculations(unittest.TestCase):
 
         df_result = df_input.copy()
         df_result["meetsParisGoal"] = calculate_meets_paris_goal(
-            df_input["totalTrend"].iloc[0], df_input["totalCarbonLawPath"].iloc[0]
+            df_input["total_trend"].iloc[0], df_input["totalCarbonLawPath"].iloc[0]
         )
 
         pd.testing.assert_frame_equal(df_result, df_expected)
@@ -162,7 +162,7 @@ class TestEmissionCalculations(unittest.TestCase):
         """Test the meets Paris goal"""
         df_input = pd.DataFrame(
             {
-                "totalTrend": [100],
+                "total_trend": [100],
                 "totalCarbonLawPath": [100],
             }
         )
@@ -172,7 +172,7 @@ class TestEmissionCalculations(unittest.TestCase):
 
         df_result = df_input.copy()
         df_result["meetsParisGoal"] = calculate_meets_paris_goal(
-            df_input["totalTrend"].iloc[0], df_input["totalCarbonLawPath"].iloc[0]
+            df_input["total_trend"].iloc[0], df_input["totalCarbonLawPath"].iloc[0]
         )
 
         pd.testing.assert_frame_equal(df_result, df_expected)
