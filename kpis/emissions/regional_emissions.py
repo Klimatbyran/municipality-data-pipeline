@@ -36,7 +36,8 @@ def regional_emission_calculations():
 
     total_emissions_df = get_n_prep_regional_data_from_smhi()
 
-    # TODO df_cem = deduct_cement(df_smhi, CEMENT_DEDUCTION)
+    # TODO email SMHI about if cement deduction is needed
+    # df_cem = deduct_cement(total_emissions_df, CEMENT_DEDUCTION)
 
     df_trend_and_approximated = calculate_trend(total_emissions_df, CURRENT_YEAR, END_YEAR)
 
