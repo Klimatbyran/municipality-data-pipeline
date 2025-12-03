@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Dict, List
+from typing import Dict, List, Optional
 import json
 import pandas as pd
 
@@ -56,14 +56,21 @@ def extract_sector_data(input_df):
 
 
 def deduct_cement_from_industry(
-    input_df: pd.DataFrame, cement_deduction: Dict[str, Dict[int, float]] = CEMENT_DEDUCTION_VALUES
+    input_df: pd.DataFrame, cement_deduction: Optional[Dict[str, Dict[int, float]]] = None
 ) -> pd.DataFrame:
     """
     Deduct cement emissions from the industry sector for specified municipalities and years.
 
-    This operates on the sector-structured dataframe produced by `extract_sector_data`,
-    where industry emissions are stored in columns named like '<year>_Industri'.
+    Args:
+        input_df (pandas.DataFrame): The input DataFrame containing sector emissions data.
+        cement_deduction (dict): A dictionary specifying the cement deduction values.
+
+    Returns:
+        pandas.DataFrame: The input DataFrame with cement emissions deducted from industry sector.
     """
+
+    if cement_deduction is None:
+        cement_deduction = CEMENT_DEDUCTION_VALUES
 
     # Deduct cement from industry sector for the given municipalities/years
     for municipality, years in cement_deduction.items():
@@ -71,11 +78,12 @@ def deduct_cement_from_industry(
             continue
 
         for year, value in years.items():
-            col_name = f"{year}_Industri"
-            if col_name in input_df.columns:
-                mask = input_df["Kommun"] == municipality
-                # Only subtract where we have a numeric value
-                input_df.loc[mask, col_name] = input_df.loc[mask, col_name].astype(float) - value
+            col_name = f"{year}_Industri (energi + processer)"
+
+            mask = input_df["Kommun"] == municipality
+            input_df.loc[mask, col_name] = (
+                input_df.loc[mask, col_name].astype(float) - value
+            )
 
     return input_df
 
@@ -122,7 +130,7 @@ def create_sector_emissions_dict(
 
 
 def generate_sector_emissions_file(
-    output_file: str = "output/sector-emissions.json", num_decimals: int = 2
+    output_file: str = "output/municipality-sector-emissions.json", num_decimals: int = 2
 ) -> None:
     """Generate a JSON file containing sector emissions data for all municipalities.
 
@@ -134,13 +142,14 @@ def generate_sector_emissions_file(
 
     df_sectors = extract_sector_data(df_raw)
 
-    # Deduct cement emissions from industry sector in the sector data
-    df_sectors = deduct_cement_from_industry(df_sectors)
+    df_cement = deduct_cement_from_industry(df_sectors)
 
-    sector_data = create_sector_emissions_dict(df_sectors, num_decimals)
+    sector_data = create_sector_emissions_dict(df_cement, num_decimals)
 
     with open(output_file, "w", encoding="utf8") as json_file:
         json.dump(sector_data, json_file, ensure_ascii=False, indent=2)
+
+    print("\nMunicipality sector emissions successfully generated!\n")
 
 
 if __name__ == "__main__":

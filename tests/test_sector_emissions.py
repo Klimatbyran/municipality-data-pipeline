@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from unittest.mock import patch
 import pandas as pd
-from sector_emissions import (
+from generate_municipality_sector_emissions import (
     create_sector_emissions_dict,
     extract_sector_data,
     generate_sector_emissions_file,
@@ -70,7 +70,7 @@ class TestSectorEmissions(unittest.TestCase):
             {
                 "Kommun": ["Skövde", "Gotland", "Krokom"],
                 "2020_Transport": [1000.0, 2000.0, 3000.0],
-                "2020_Industri": [5000.0, 8000.0, 11000.0],
+                "2020_Industri (energi + processer)": [5000.0, 8000.0, 11000.0],
             }
         )
 
@@ -88,8 +88,8 @@ class TestSectorEmissions(unittest.TestCase):
         self.assertEqual(df_result.loc[2, "2020_Transport"], 3000.0)
 
         # Industry sector should be reduced by the cement amounts
-        self.assertEqual(df_result.loc[0, "2020_Industri"], 4900.0)
-        self.assertEqual(df_result.loc[1, "2020_Industri"], 7800.0)
+        self.assertEqual(df_result.loc[0, "2020_Industri (energi + processer)"], 4900.0)
+        self.assertEqual(df_result.loc[1, "2020_Industri (energi + processer)"], 7800.0)
 
     def test_generate_sector_emissions_file(self):
         """Test the generation of sector emissions JSON file with mocked data."""
@@ -102,8 +102,8 @@ class TestSectorEmissions(unittest.TestCase):
             }
         )
 
-        with patch("sector_emissions.get_smhi_data", return_value=mock_df), patch(
-            "sector_emissions.extract_sector_data", return_value=mock_df
+        with patch("generate_municipality_sector_emissions.get_smhi_data", return_value=mock_df), patch(
+            "generate_municipality_sector_emissions.extract_sector_data", return_value=mock_df
         ):
             generate_sector_emissions_file(str(output_file))
             self._verify_generated_file(output_file)
