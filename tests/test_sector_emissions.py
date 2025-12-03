@@ -7,6 +7,7 @@ from sector_emissions import (
     create_sector_emissions_dict,
     extract_sector_data,
     generate_sector_emissions_file,
+    deduct_cement_from_industry,
 )
 from kpis.emissions.historical_data_calculations import get_smhi_data
 
@@ -62,6 +63,33 @@ class TestSectorEmissions(unittest.TestCase):
         result = create_sector_emissions_dict(input_df)
         self.assertEqual(result[0]["sectors"]["2020"]["Transport"], 56224.71)
         self.assertIsNone(result[0]["sectors"]["2020"]["Industri"])
+
+    def test_deduct_cement_from_industry(self):
+        """Test that cement is deducted from the industry sector only."""
+        df_input = pd.DataFrame(
+            {
+                "Kommun": ["Skövde", "Gotland", "Krokom"],
+                "2020_Transport": [1000.0, 2000.0, 3000.0],
+                "2020_Industri": [5000.0, 8000.0, 11000.0],
+            }
+        )
+
+        cement_deduction = {
+            "Skövde": {2020: 100.0},
+            "Gotland": {2020: 200.0},
+            "Krokom": {2020: 300.0},
+        }
+
+        df_result = deduct_cement_from_industry(df_input, cement_deduction)
+
+        # Transport sector should remain unchanged
+        self.assertEqual(df_result.loc[0, "2020_Transport"], 1000.0)
+        self.assertEqual(df_result.loc[1, "2020_Transport"], 2000.0)
+        self.assertEqual(df_result.loc[2, "2020_Transport"], 3000.0)
+
+        # Industry sector should be reduced by the cement amounts
+        self.assertEqual(df_result.loc[0, "2020_Industri"], 4900.0)
+        self.assertEqual(df_result.loc[1, "2020_Industri"], 7800.0)
 
     def test_generate_sector_emissions_file(self):
         """Test the generation of sector emissions JSON file with mocked data."""

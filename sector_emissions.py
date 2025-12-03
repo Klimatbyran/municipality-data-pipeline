@@ -4,6 +4,7 @@ import json
 import pandas as pd
 
 from kpis.emissions.historical_data_calculations import get_smhi_data
+from kpis.emissions.cement_deductions import CEMENT_DEDUCTION_VALUES
 
 
 def extract_sector_data(input_df):
@@ -52,6 +53,31 @@ def extract_sector_data(input_df):
             df_sectors = df_sectors.merge(df_sector_copy, on="Kommun", how="left")
 
     return df_sectors
+
+
+def deduct_cement_from_industry(
+    input_df: pd.DataFrame, cement_deduction: Dict[str, Dict[int, float]] = CEMENT_DEDUCTION_VALUES
+) -> pd.DataFrame:
+    """
+    Deduct cement emissions from the industry sector for specified municipalities and years.
+
+    This operates on the sector-structured dataframe produced by `extract_sector_data`,
+    where industry emissions are stored in columns named like '<year>_Industri'.
+    """
+
+    # Deduct cement from industry sector for the given municipalities/years
+    for municipality, years in cement_deduction.items():
+        if municipality not in input_df["Kommun"].values:
+            continue
+
+        for year, value in years.items():
+            col_name = f"{year}_Industri"
+            if col_name in input_df.columns:
+                mask = input_df["Kommun"] == municipality
+                # Only subtract where we have a numeric value
+                input_df.loc[mask, col_name] = input_df.loc[mask, col_name].astype(float) - value
+
+    return input_df
 
 
 def create_sector_emissions_dict(
@@ -107,6 +133,9 @@ def generate_sector_emissions_file(
     df_raw = get_smhi_data()
 
     df_sectors = extract_sector_data(df_raw)
+
+    # Deduct cement emissions from industry sector in the sector data
+    df_sectors = deduct_cement_from_industry(df_sectors)
 
     sector_data = create_sector_emissions_dict(df_sectors, num_decimals)
 
