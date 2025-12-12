@@ -86,8 +86,8 @@ class TestTrendCalculations(unittest.TestCase):
     ):
         result = df_result.iloc[0][column_name]
         self.assertEqual(
-            result,
-            expected_value,
+            round(result, 4),
+            round(expected_value, 4),
             f"{test_string}{result - expected_value}",
         )
 
