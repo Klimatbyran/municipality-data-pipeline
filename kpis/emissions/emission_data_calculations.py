@@ -5,7 +5,6 @@ from datetime import datetime
 
 import numpy as np
 
-from kpis.emissions.cement_deductions import CEMENT_DEDUCTION_VALUES
 from kpis.emissions.historical_data_calculations import get_n_prep_data_from_smhi
 from kpis.emissions.trend_calculations import calculate_trend, calculate_total_trend
 from kpis.emissions.carbon_law_calculations import calculate_carbon_law_total
@@ -23,36 +22,6 @@ PATH_SMHI = (
     "https://nationellaemissionsdatabasen.smhi.se/api/"
     + "getexcelfile/?county=0&municipality=0&sub=GGT"
 )
-
-
-CEMENT_DEDUCTION = CEMENT_DEDUCTION_VALUES
-
-
-def deduct_cement(df, cement_deduction):
-    """
-    Deducts cement emissions from the given DataFrame based on the provided cement deduction values.
-
-    Args:
-        df (pandas.DataFrame): The DataFrame containing the emission data.
-        cement_deduction (dict): A dictionary specifying the cement
-                                 deduction values for each municipality.
-
-    Returns:
-        pandas.DataFrame: The DataFrame with the cement emissions deducted.
-    """
-
-    df_cem = df.copy()
-
-    # Deduct cement from given municipalities
-    for i in cement_deduction.keys():
-        for j in cement_deduction[i].keys():
-            # Only deduct if the year column exists in the DataFrame
-            if j in df_cem.columns:
-                df_cem.loc[df_cem["Kommun"] == i, j] = (
-                    df_cem.loc[df_cem["Kommun"] == i, j].values - cement_deduction[i][j]
-                )
-
-    return df_cem
 
 
 def calculate_historical_change_percent(df, column_name, last_year_in_range):
@@ -111,9 +80,7 @@ def emission_calculations(df):
 
     df_smhi = get_n_prep_data_from_smhi(df)
 
-    df_cem = deduct_cement(df_smhi, CEMENT_DEDUCTION)
-
-    df_trend_and_approximated = calculate_trend(df_cem, CURRENT_YEAR, END_YEAR)
+    df_trend_and_approximated = calculate_trend(df_smhi, CURRENT_YEAR, END_YEAR)
 
     df_trend_and_approximated["total_trend"] = calculate_total_trend(df_trend_and_approximated)
 

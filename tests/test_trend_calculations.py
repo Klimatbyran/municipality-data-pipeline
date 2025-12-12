@@ -114,7 +114,7 @@ class TestTrendCalculations(unittest.TestCase):
         self._compare_predicted_results(
             df_result,
             "trend_2034",
-            282.85714395918365,
+            282.8571,
             "Trend 2034 is off by ",
         )
 
