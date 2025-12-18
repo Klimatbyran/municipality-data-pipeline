@@ -63,7 +63,7 @@ def create_new_columns_structure(years_approximated, years_trend, num_rows):
     }
     for year in years_trend:
         new_columns_data[f"trend_{int(year)}"] = [None] * num_rows
-    new_columns_data["emission_slope"] = [None] * num_rows
+    new_columns_data["trend_emissions_slope"] = [None] * num_rows
 
     return new_columns_data
 
@@ -167,7 +167,7 @@ def fit_regression_per_municipality(
             column_name = f"trend_{int(year)}"
             new_columns_data[column_name][idx] = preds_trend[i] + shift
 
-        new_columns_data["emission_slope"][idx] = emission_slope
+        new_columns_data["trend_emissions_slope"][idx] = emission_slope
 
 
 def calculate_total_trend(input_df):

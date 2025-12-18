@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-
+from dateutil.relativedelta import relativedelta
 import numpy as np
 
 from kpis.emissions.historical_data_calculations import get_n_prep_data_from_smhi
@@ -11,6 +11,7 @@ from kpis.emissions.carbon_law_calculations import calculate_carbon_law_total
 
 
 CURRENT_YEAR = datetime.now().year  # current year
+YEAR_SECONDS = 60 * 60 * 24 * 365   # a year in seconds
 LAST_YEAR_WITH_SMHI_DATA = (
     2023  # last year for which the National Emission database has data
 )
@@ -59,6 +60,48 @@ def calculate_historical_change_percent(df, column_name, last_year_in_range):
 
     return df
 
+def calculate_hit_net_zero(input_df, current_year):
+    """
+    Calculates the date and year for when each municipality hits net zero emissions (if so).
+    This is done by deriving where the linear trend line crosses the time axis.
+
+    Args:
+        df (pandas.DataFrame): The input DataFrame containing the emissions data.
+        current_year (int): Current year
+
+    Returns:
+        pandas.DataFrame: The input DataFrame with an additional column 'hit_net_zero' that contains
+        the date when net zero emissions are reached for each municipality.
+    """
+    dates = []
+    for i in range(len(input_df)):
+        slope = input_df.iloc[i]["trend_emissions_slope"]
+
+        col_name = (
+            current_year
+            if current_year in input_df.columns
+            else f"approximated_{current_year}"
+        )
+        emissions_value_raw = input_df.iloc[i][col_name]
+        emissions_value = float(emissions_value_raw)
+
+        if slope < 0:
+            # E(t) = E0 + slope*(t - y0) => t_cross = y0 - E0/slope
+            y0 = int(current_year)
+            t_cross = y0 - (emissions_value / slope)
+
+            whole_year = int(t_cross)
+            frac = t_cross - whole_year
+            base_dt = datetime(whole_year, 1, 1)
+            date_cross = (base_dt + relativedelta(seconds=int(frac * YEAR_SECONDS))).date()
+            dates.append(date_cross)
+        else:
+            dates.append(None)
+
+    df_out = input_df.copy()
+    df_out["hit_net_zero"] = dates
+    return df_out
+
 
 def calculate_meets_paris_goal(total_trend, total_carbon_law_path):
     """
@@ -88,8 +131,10 @@ def emission_calculations(df):
         df_trend_and_approximated, "Kommun", LAST_YEAR_WITH_SMHI_DATA
     )
 
+    df_hit_net_zero = calculate_hit_net_zero(df_historical_change_percent, LAST_YEAR_WITH_SMHI_DATA)
+
     df_carbon_law = calculate_carbon_law_total(
-        df_historical_change_percent,
+        df_hit_net_zero,
         CURRENT_YEAR,
         END_YEAR,
         CARBON_LAW_REDUCTION_RATE,
