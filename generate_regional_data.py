@@ -41,7 +41,7 @@ def series_to_dict(
     return {
         "region": row["Län"],
         "emissions": {str(year): row[year] for year in historical_columns},
-        "totalTrend": row["totalTrend"],
+        "total_trend": row["total_trend"],
         "totalCarbonLaw": row["totalCarbonLawPath"],
         "approximatedHistoricalEmission": {
             year.replace("approximated_", ""): row[year]
@@ -49,7 +49,7 @@ def series_to_dict(
         },
         "trend": {year.replace("trend_", ""): row[year] for year in trend_columns},
         "historicalEmissionChangePercent": row["historicalEmissionChangePercent"],
-        "meetsParis": row["totalTrend"]/row["totalCarbonLawPath"] < 1,
+        "meetsParis": row["total_trend"]/row["totalCarbonLawPath"] < 1,
         "municipalities": row["municipalities"]
         # "politicalRule": row["Rule"],
     }
