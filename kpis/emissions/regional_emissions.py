@@ -38,7 +38,7 @@ def regional_emission_calculations():
 
     df_trend_and_approximated = calculate_trend(total_emissions_df, CURRENT_YEAR, END_YEAR)
 
-    df_trend_and_approximated["totalTrend"] = df_trend_and_approximated.apply(
+    df_trend_and_approximated["total_trend"] = df_trend_and_approximated.apply(
         lambda row: row[[col for col in row.index if "trend_" in str(col)]].sum(),
         axis=1,
     )
@@ -56,7 +56,7 @@ def regional_emission_calculations():
 
     df_carbon_law["meetsParisGoal"] = df_carbon_law.apply(
         lambda row: calculate_meets_paris_goal(
-            row["totalTrend"], row["totalCarbonLawPath"]
+            row["total_trend"], row["totalCarbonLawPath"]
         ),
         axis=1,
     )

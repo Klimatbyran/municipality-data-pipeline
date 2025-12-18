@@ -171,7 +171,7 @@ class TestEmissionCalculations(unittest.TestCase):
                 "trend_2049": [101375.732317],
                 "trend_2050": [100035.431545],
                 "trend_emissions_slope": [-1340.30077],
-                "totalTrend": [3035178.670407],
+                "total_trend": [3035178.670407],
                 "historicalEmissionChangePercent": [-1.347337],
                 "hit_net_zero": [datetime.date(2124, 8, 20)],
                 "totalCarbonLawPath": [1.094868e06],
@@ -237,7 +237,7 @@ class TestEmissionCalculations(unittest.TestCase):
                 "trend_2049": [33924.452239],
                 "trend_2050": [33599.054141],
                 "trend_emissions_slope": [-325.398099],
-                "totalTrend": [979004.391711],
+                "total_trend": [979004.391711],
                 "historicalEmissionChangePercent": [-0.610923],
                 "hit_net_zero": [datetime.date(2153, 4, 4)],
                 "totalCarbonLawPath": [342161.18693],
@@ -246,6 +246,9 @@ class TestEmissionCalculations(unittest.TestCase):
         )
 
         df_result = emission_calculations(df_input)
+        
+        print('total trend res ', df_result["total_trend"])
+        print('total trend exp ', df_expected["total_trend"])
 
         pd.testing.assert_frame_equal(df_result, df_expected)
 
