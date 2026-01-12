@@ -143,7 +143,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-o",
         "--outfile",
-        default="output/climate-data.json",
+        default="output/municipality-data.json",
         type=str,
         help="Output filename (JSON formatted)",
     )

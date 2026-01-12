@@ -2,7 +2,7 @@ import json
 import os
 import unittest
 
-OUTPUT_PATH = "output/climate-data.json"
+OUTPUT_PATH = "output/municipality-data.json"
 
 
 class TestClimateData(unittest.TestCase):
