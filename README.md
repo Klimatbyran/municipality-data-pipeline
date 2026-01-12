@@ -23,7 +23,7 @@ We utilize Python libraries such as Pandas and NumPy to perform various calculat
 This repository contains both the datasets we host and the Python scripts for calculations.
  - `climate_data_calculations.py`: Execute this Python script to run all the calculations and generate updated data.
 - `/output:` This is where the processed data gets saved.
-    - `climate-data.json`: This JSON file serves as the core output, containing all the calculated climate data.
+    - `municipality-data.json`: This JSON file serves as the core output, containing all the calculated climate data.
     - `sector-emissions.json`: This JSON file contains sector emissions data for municipalities.
 - `/tests:` Unit tests for data calculations. To run all tests:
 
@@ -58,7 +58,7 @@ Then run:
 
 `python3 sector_emissions.py`
 
-The results will be saved in the `/output` folder, primarily in the `climate-data.json` and `sector-emissions.json` files respectively.
+The results will be saved in the `/output` folder, primarily in the `municipality-data.json` and `sector-emissions.json` files respectively.
 
 
 #### Handling Data Inconsistencies for Municipalities
