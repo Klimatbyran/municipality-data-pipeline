@@ -259,9 +259,29 @@ class TestTrendCalculations(unittest.TestCase):
 
         expected_total_trend = 1750
 
-        resulting_value = calculate_total_trend(df_input)
+        resulting_series = calculate_total_trend(df_input)
+        resulting_value = resulting_series.iloc[0]
 
         self.assertEqual(resulting_value, expected_total_trend)
+
+    def test_total_trend_multiple_municipalities(self):
+        """Test the total trend for multiple municipalities"""
+        df_input = pd.DataFrame(
+            {
+                "Kommun": ["Norrköping", "Stockholm"],
+                "trend_2029": [100, 200],
+                "trend_2030": [150, 250],
+                "trend_2031": [200, 300],
+            }
+        )
+
+        resulting_series = calculate_total_trend(df_input)
+
+        # Each municipality should have its own total trend
+        self.assertEqual(resulting_series.iloc[0], 450)
+        self.assertEqual(resulting_series.iloc[1], 750)
+        # Verify they are different
+        self.assertNotEqual(resulting_series.iloc[0], resulting_series.iloc[1])
 
 
 if __name__ == "__main__":
