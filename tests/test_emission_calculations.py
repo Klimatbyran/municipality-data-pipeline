@@ -144,7 +144,7 @@ class TestEmissionCalculations(unittest.TestCase):
                 "approximated_2023": [136223.552398],
                 "approximated_2024": [134883.251626],
                 "approximated_2025": [133542.950853],
-                "trend_2025": [133542.950853],
+                "approximated_2026": [132202.650081],
                 "trend_2026": [132202.650081],
                 "trend_2027": [130862.349309],
                 "trend_2028": [129522.048536],
@@ -171,10 +171,10 @@ class TestEmissionCalculations(unittest.TestCase):
                 "trend_2049": [101375.732317],
                 "trend_2050": [100035.431545],
                 "trend_emissions_slope": [-1340.30077],
-                "total_trend": [3035178.670407],
+                "total_trend": [2901634.034172],
                 "historicalEmissionChangePercent": [-1.347337],
                 "hit_net_zero": [datetime.date(2124, 8, 20)],
-                "totalCarbonLawPath": [1.094868e06],
+                "totalCarbonLawPath": [1078020.199323],
                 "meetsParisGoal": [False],
             }
         )
@@ -210,7 +210,7 @@ class TestEmissionCalculations(unittest.TestCase):
                 "approximated_2023": [42384.802812],
                 "approximated_2024": [42059.404713],
                 "approximated_2025": [41734.006614],
-                "trend_2025": [41734.006614],
+                "approximated_2026": [41408.608515],
                 "trend_2026": [41408.608515],
                 "trend_2027": [41083.210416],
                 "trend_2028": [40757.812317],
@@ -237,18 +237,15 @@ class TestEmissionCalculations(unittest.TestCase):
                 "trend_2049": [33924.452239],
                 "trend_2050": [33599.054141],
                 "trend_emissions_slope": [-325.398099],
-                "total_trend": [979004.391711],
+                "total_trend": [937270.386426],
                 "historicalEmissionChangePercent": [-0.610923],
                 "hit_net_zero": [datetime.date(2153, 4, 4)],
-                "totalCarbonLawPath": [342161.18693],
+                "totalCarbonLawPath": [337658.31858],
                 "meetsParisGoal": [False],
             }
         )
 
         df_result = emission_calculations(df_input)
-        
-        print('total trend res ', df_result["total_trend"])
-        print('total trend exp ', df_expected["total_trend"])
 
         pd.testing.assert_frame_equal(df_result, df_expected)
 
