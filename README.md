@@ -23,8 +23,9 @@ We utilize Python libraries such as Pandas and NumPy to perform various calculat
 This repository contains both the datasets we host and the Python scripts for calculations.
  - `climate_data_calculations.py`: Execute this Python script to run all the calculations and generate updated data.
 - `/output:` This is where the processed data gets saved.
-    - `municipality-data.json`: This JSON file serves as the core output, containing all the calculated climate data.
-    - `sector-emissions.json`: This JSON file contains sector emissions data for municipalities.
+    - `municipality-data.json`: This JSON file contains the calculated climate data for individual municipalities.
+    - `regional-data.json`: This JSON file contains climate data aggregated at the county (Swedish "län") level, including emissions, trends, Carbon Law calculations, and Paris Agreement compliance metrics for each region.
+    - `sector-emissions.json`: This JSON file contains emissions data broken down by sector (e.g., transportation, industry, agriculture) for each municipality.
 - `/tests:` Unit tests for data calculations. To run all tests:
 
     ```
@@ -54,11 +55,21 @@ To recalculate and refresh the site's data, start by executing:
 
 `python3 climate_data_calculations.py`
 
+This generates the main municipality data file (`municipality-data.json`).
+
 Then run:
 
 `python3 sector_emissions.py`
 
-The results will be saved in the `/output` folder, primarily in the `municipality-data.json` and `sector-emissions.json` files respectively.
+This generates sector-specific emissions data (`sector-emissions.json`).
+
+Finally, run:
+
+`python3 generate_regional_data.py`
+
+This generates regional (county-level) aggregated data (`regional-data.json`).
+
+The results will be saved in the `/output` folder in their respective JSON files.
 
 
 #### Handling Data Inconsistencies for Municipalities
@@ -104,6 +115,38 @@ Here's a summary of what the functions do, in order of execution in `/kpis/emiss
 5. `calculate_historical_change_percent`: Calculates the average historical yearly emission change in percent based on SMHI data from 2015 onwards.
 
 6. `calculate_carbon_law_total`: Calculates total emissions from carbon law reduction path for municipalities.
+
+### Regional Data
+
+The `generate_regional_data.py` script aggregates municipality-level climate data to the county (Län) level. Regional data includes:
+
+- **Historical emissions**: Year-by-year emissions data for each county from 1990 onwards
+- **Total trend**: Sum of projected emissions from the current year to 2050 based on linear trend analysis
+- **Total Carbon Law**: Total emissions allowed under the Carbon Law reduction path (11.72% annual reduction)
+- **Approximated historical emissions**: Interpolated emissions for years between the last verified SMHI data and the current year
+- **Trend projections**: Projected emissions for each year from the current year to 2050 based on historical trends
+- **Historical emission change percent**: Average annual percentage change in emissions since 2015
+- **Paris Agreement compliance**: Boolean indicating whether the region's projected emissions meet the Carbon Law requirements (meetsParis)
+- **Municipalities**: List of municipalities included in each county
+
+Regional data uses the same calculation methods as municipality data but aggregates results at the county level, making it useful for regional analysis and comparisons.
+
+### Sector Emissions Data
+
+The `sector_emissions.py` script extracts and processes sector-specific emissions data from SMHI's National Emission Database on municipal level. Sector emissions data includes:
+
+- **Municipality-level breakdown**: Emissions data organized by municipality name
+- **Sector categories**: Emissions broken down by main sectors such as:
+  - Transportation
+  - Industry
+  - Agriculture
+  - Energy production
+  - Waste management
+  - And other sectors as defined in SMHI's database
+- **Yearly data**: Sector emissions provided for each year available in the SMHI dataset
+- **Structured format**: Data organized as `{municipality: {year: {sector: emissions}}}` for easy access and visualization
+
+This data enables analysis of which sectors contribute most to emissions in each municipality, helping identify areas for targeted climate action.
 
 ## Contributing
 
