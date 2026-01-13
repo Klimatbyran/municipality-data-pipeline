@@ -12,9 +12,7 @@ from kpis.emissions.carbon_law_calculations import calculate_carbon_law_total
 
 CURRENT_YEAR = datetime.now().year  # current year
 YEAR_SECONDS = 60 * 60 * 24 * 365   # a year in seconds
-LAST_YEAR_WITH_SMHI_DATA = (
-    2023  # last year for which the National Emission database has data
-)
+LAST_YEAR_WITH_SMHI_DATA = 2023  # last year for which the National Emission database has data
 END_YEAR = 2050
 
 CARBON_LAW_REDUCTION_RATE = 0.1172

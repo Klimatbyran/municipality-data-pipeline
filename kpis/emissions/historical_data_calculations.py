@@ -107,3 +107,27 @@ def get_n_prep_regional_data_from_smhi():
     df_total = df_total.sort_values(by=["Län"]).reset_index(drop=True)
 
     return df_total
+
+def get_n_prep_national_data_from_smhi():
+    """
+    Retrieves and prepares national CO2 emission data from SMHI.
+
+    Returns:
+        pandas.DataFrame: The cleaned dataframe with national emissions data.
+    """
+
+    df_raw = get_smhi_data()
+
+    # Extract total emissions from the SMHI data for national level
+    df_total = df_raw[
+        (df_raw["Huvudsektor"] == "Alla")
+        & (df_raw["Undersektor"] == "Alla")
+        & (df_raw["Län"] == "Alla")
+        & (df_raw["Kommun"] == "Alla")
+    ]
+    df_total = df_total.reset_index(drop=True)
+
+    # Add a column for the country name and municipalities list
+    df_total["Land"] = "Sverige"
+
+    return df_total
