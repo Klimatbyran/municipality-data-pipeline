@@ -79,14 +79,12 @@ def get_coat_of_arms(municipality_name):
 
 def get_municipality_wiki_id(municipality_name):
     url = "https://www.wikidata.org/w/api.php"
-
     params = {
         "action": "wbsearchentities",
         "search": municipality_name,
         "language": "sv",
         "format": "json"
     }
-
     headers = {
         "User-Agent": "KlimatkollenFetcher/1.0 (contact: hej@klimatkollen.se)"
     }
@@ -95,19 +93,21 @@ def get_municipality_wiki_id(municipality_name):
   
     try:
         response = res.json()
-        search_results = response["search"]
-        wiki_ids = []
-        wiki_ids.append(search_results[0].get("id"))
-       
-   
+        search_results = response.get("search", [])
+        if not search_results:
+            return [] 
+
+        wiki_ids = [search_results[0].get("id")]
+
         if len(search_results) > 1:
             for municipality in search_results:
                 if municipality_name + " Municipality" in municipality["label"]:
                     valid_id = municipality.get("id")
                     if valid_id not in wiki_ids:
-                        wiki_ids.append(municipality.get("id"))
+                        wiki_ids.append(valid_id)
+
         return wiki_ids
 
     except ValueError:
         print("Could not find valid wikiId")
-        return
+        return []
