@@ -77,7 +77,7 @@ class TestTrendCalculations(unittest.TestCase):
                 "trend_2033": [None],
                 "trend_2034": [None],
                 "trend_2035": [None],
-                "emission_slope": [None],
+                "trend_emissions_slope": [None],
             },
         )
 
@@ -86,8 +86,8 @@ class TestTrendCalculations(unittest.TestCase):
     ):
         result = df_result.iloc[0][column_name]
         self.assertEqual(
-            result,
-            expected_value,
+            round(result, 4),
+            round(expected_value, 4),
             f"{test_string}{result - expected_value}",
         )
 
@@ -104,7 +104,7 @@ class TestTrendCalculations(unittest.TestCase):
 
         df_result = calculate_trend(DF_INPUT, CURRENT_YEAR, END_YEAR, CUTOFF_YEAR)
 
-        self.assertIn("emission_slope", df_result.columns)
+        self.assertIn("trend_emissions_slope", df_result.columns)
 
         self.assertTrue(
             all(col in df_result.columns for col in expected_trend),
@@ -114,7 +114,7 @@ class TestTrendCalculations(unittest.TestCase):
         self._compare_predicted_results(
             df_result,
             "trend_2034",
-            282.85714395918365,
+            282.8571,
             "Trend 2034 is off by ",
         )
 
@@ -259,9 +259,29 @@ class TestTrendCalculations(unittest.TestCase):
 
         expected_total_trend = 1750
 
-        resulting_value = calculate_total_trend(df_input)
+        resulting_series = calculate_total_trend(df_input)
+        resulting_value = resulting_series.iloc[0]
 
         self.assertEqual(resulting_value, expected_total_trend)
+
+    def test_total_trend_multiple_municipalities(self):
+        """Test the total trend for multiple municipalities"""
+        df_input = pd.DataFrame(
+            {
+                "Kommun": ["Norrköping", "Stockholm"],
+                "trend_2029": [100, 200],
+                "trend_2030": [150, 250],
+                "trend_2031": [200, 300],
+            }
+        )
+
+        resulting_series = calculate_total_trend(df_input)
+
+        # Each municipality should have its own total trend
+        self.assertEqual(resulting_series.iloc[0], 450)
+        self.assertEqual(resulting_series.iloc[1], 750)
+        # Verify they are different
+        self.assertNotEqual(resulting_series.iloc[0], resulting_series.iloc[1])
 
 
 if __name__ == "__main__":

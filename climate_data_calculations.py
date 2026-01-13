@@ -92,7 +92,7 @@ def series_to_dict(
         "logoUrl": row["coatOfArms"],
         "region": row["Län"],
         "emissions": {str(year): row[year] for year in historical_columns},
-        "totalTrend": row["totalTrend"],
+        "totalTrend": row["total_trend"],
         "totalCarbonLaw": row["totalCarbonLawPath"],
         "approximatedHistoricalEmission": {
             year.replace("approximated_", ""): row[year]
@@ -100,6 +100,7 @@ def series_to_dict(
         },
         "trend": {year.replace("trend_", ""): row[year] for year in trend_columns},
         "historicalEmissionChangePercent": row["historicalEmissionChangePercent"],
+        "hitNetZero": row["hit_net_zero"],
         "electricCarChangePercent": row["evChangeRate"],
         "climatePlanLink": row["Länk till aktuell klimatplan"],
         "climatePlanYear": row["Antagen år"],
@@ -146,7 +147,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-o",
         "--outfile",
-        default="output/climate-data.json",
+        default="output/municipality-data.json",
         type=str,
         help="Output filename (JSON formatted)",
     )

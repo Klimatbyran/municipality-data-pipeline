@@ -63,7 +63,7 @@ def create_new_columns_structure(years_approximated, years_trend, num_rows):
     }
     for year in years_trend:
         new_columns_data[f"trend_{int(year)}"] = [None] * num_rows
-    new_columns_data["emission_slope"] = [None] * num_rows
+    new_columns_data["trend_emissions_slope"] = [None] * num_rows
 
     return new_columns_data
 
@@ -167,22 +167,24 @@ def fit_regression_per_municipality(
             column_name = f"trend_{int(year)}"
             new_columns_data[column_name][idx] = preds_trend[i] + shift
 
-        new_columns_data["emission_slope"][idx] = emission_slope
+        new_columns_data["trend_emissions_slope"][idx] = emission_slope
 
 
 def calculate_total_trend(input_df):
     """
-    Calculate the total trend for the input dataframe.
+    Calculate the total trend for each municipality in the input dataframe.
 
     Parameters:
     - input_df (pandas.DataFrame): The input dataframe containing municipality data.
 
     Returns:
-    - total trend (int): Total trend for the input dataframe.
+    - pandas.Series: Total trend for each municipality (row-wise sum of trend columns).
     """
-    trend_columns = [col for col in input_df.columns if "trend_" in str(col)]
-    trend_values = input_df[trend_columns].values
-    return trend_values.sum()
+    trend_columns = [
+        col for col in input_df.columns 
+        if "trend_" in str(col) and "slope" not in str(col) and "coefficient" not in str(col)
+    ]
+    return input_df[trend_columns].sum(axis=1)
 
 
 def calculate_trend(input_df, current_year, end_year, cutoff_year=2015):

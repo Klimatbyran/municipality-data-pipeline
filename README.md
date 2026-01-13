@@ -23,7 +23,7 @@ We utilize Python libraries such as Pandas and NumPy to perform various calculat
 This repository contains both the datasets we host and the Python scripts for calculations.
  - `climate_data_calculations.py`: Execute this Python script to run all the calculations and generate updated data.
 - `/output:` This is where the processed data gets saved.
-    - `climate-data.json`: This JSON file serves as the core output, containing all the calculated climate data.
+    - `municipality-data.json`: This JSON file serves as the core output, containing all the calculated climate data.
     - `sector-emissions.json`: This JSON file contains sector emissions data for municipalities.
 - `/tests:` Unit tests for data calculations. To run all tests:
 
@@ -58,7 +58,7 @@ Then run:
 
 `python3 sector_emissions.py`
 
-The results will be saved in the `/output` folder, primarily in the `climate-data.json` and `sector-emissions.json` files respectively.
+The results will be saved in the `/output` folder, primarily in the `municipality-data.json` and `sector-emissions.json` files respectively.
 
 
 #### Handling Data Inconsistencies for Municipalities
@@ -85,7 +85,6 @@ There are a few important constants that determine the source, baseline and scop
 
 * `PATH_SMHI`: API URL to the SMHI emissions data from the [National Emission Database](https://nationellaemissionsdatabasen.smhi.se/). Currently set to download data for all municipalities and counties with GGT (Greenhouse Gas Total) emissions.
 * `CARBON_LAW_REDUCTION_RATE`: SAnnual reduction rate mandated by the Carbon Law, currently set to 11.72% per year (0.1172 as decimal) as of 2025.
-* `CEMENT_DEDUCTION`: Dictionary containing annual CO2 emissions data from cement production that should be deducted from total emissions for municipalities with cement plants (Mörbylånga, Skövde, and Gotland). Values are in tonnes CO2.
 * `LAST_YEAR_WITH_SMHI_DATA`: The last year for which verified emissions data is available from SMHI's National Emission Database.
 * `CURRENT_YEAR`: The year to be treated as the current year for calculations and projections (currently 2025).
 * `END_YEAR`: The final year for emission projections and Carbon Law calculations (currently 2050).
@@ -96,17 +95,15 @@ Here's a summary of what the functions do, in order of execution in `/kpis/emiss
 
 1. `get_n_prep_data_from_smhi`: Downloads data from SMHI and preprocess it into a pandas dataframe.
 
-2. `deduct_cement`: Deducts cement emissions from specified municipalities.
+2. `calculate_trend`: Calculates linear trend coefficients and future values for each municipailty based on SMHI data from 2015 onwards. This is done by fitting a straight line to the data using least absolute deviations (LAD).
 
-3. `calculate_trend`: Calculates linear trend coefficients and future values for each municipailty based on SMHI data from 2015 onwards. This is done by fitting a straight line to the data using least absolute deviations (LAD).
+3. `calculate_approximated_historical`: Calculates approximated historical data values for years passed since the last year with SMHI data. This is done by interpolation using previously calculated linear trend coefficients.
 
-4. `calculate_approximated_historical`: Calculates approximated historical data values for years passed since the last year with SMHI data. This is done by interpolation using previously calculated linear trend coefficients.
+4. `calculate_trend`: Calculates trend line for future years up to 2050. This is done by interpolation using previously calculated linear trend coefficients
 
-5. `calculate_trend`: Calculates trend line for future years up to 2050. This is done by interpolation using previously calculated linear trend coefficients
+5. `calculate_historical_change_percent`: Calculates the average historical yearly emission change in percent based on SMHI data from 2015 onwards.
 
-6. `calculate_historical_change_percent`: Calculates the average historical yearly emission change in percent based on SMHI data from 2015 onwards.
-
-7. `calculate_carbon_law_total`: Calculates total emissions from carbon law reduction path for municipalities.
+6. `calculate_carbon_law_total`: Calculates total emissions from carbon law reduction path for municipalities.
 
 ## Contributing
 
