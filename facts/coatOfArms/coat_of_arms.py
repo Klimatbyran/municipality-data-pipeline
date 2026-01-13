@@ -1,11 +1,8 @@
-import requests
-import json 
 from urllib.parse import quote
-
-
+import requests
 
 def get_coat_of_arms(municipality_name):
-    
+
     """ Retrieve coat of arms URL for a given municipality.
     
     Searches for municipality in Wikidata and retrieves the coat of arms image URL
@@ -19,9 +16,9 @@ def get_coat_of_arms(municipality_name):
     """
 
 
-    wiki_ids = get_municipality_wikiId(municipality_name)
+    wiki_ids = get_municipality_wiki_id(municipality_name)
 
-    if not wiki_ids: 
+    if not wiki_ids:
         return None
    
     
@@ -30,15 +27,15 @@ def get_coat_of_arms(municipality_name):
    
     for id in wiki_ids:
         url = f'https://www.wikidata.org/w/api.php?action=wbgetentities&ids={id}&props=claims&format=json'
-        res = requests.get(url, headers=headers) 
+        res = requests.get(url, headers=headers, timeout=30)
  
-        try: 
+        try:
             response = res.json()
             claims = response["entities"][id]["claims"]
 
             p94 = claims.get("P94")
             p154 = claims.get("P154")
-            filename = None 
+            filename = None
 
             if p94:
                 print("P94 exists:", p94[0])
@@ -52,7 +49,7 @@ def get_coat_of_arms(municipality_name):
                 if filename and isinstance(filename, str):
                     print(filename)
                     url = f"https://commons.wikimedia.org/wiki/Special:Redirect/file/{quote(filename)}"
-                    res = requests.get(url, headers=headers, allow_redirects=True) 
+                    res = requests.get(url, headers=headers, allow_redirects=True, timeout=30)
                     coat_of_arms_url = res.url
 
             else:
@@ -67,7 +64,7 @@ def get_coat_of_arms(municipality_name):
                     
                     if filename and isinstance(filename, str):
                         url = f"https://commons.wikimedia.org/wiki/Special:Redirect/file/{quote(filename)}"
-                        res = requests.get(url, headers=headers, allow_redirects=True) 
+                        res = requests.get(url, headers=headers, allow_redirects=True, timeout=30)
                         coat_of_arms_url = res.url
 
                 else:
@@ -80,7 +77,7 @@ def get_coat_of_arms(municipality_name):
     return coat_of_arms_url
 
 
-def get_municipality_wikiId(municipality_name):
+def get_municipality_wiki_id(municipality_name):
     url = "https://www.wikidata.org/w/api.php"
 
     params = {
@@ -94,15 +91,15 @@ def get_municipality_wikiId(municipality_name):
         "User-Agent": "KlimatkollenFetcher/1.0 (contact: hej@klimatkollen.se)"
     }
 
-    res = requests.get(url, params=params, headers=headers)
-    
+    res = requests.get(url, params=params, headers=headers, timeout=30)
+  
     try:
         response = res.json()
         search_results = response["search"]
         wiki_ids = []
         wiki_ids.append(search_results[0].get("id"))
-        
-    
+       
+   
         if len(search_results) > 1:
             for municipality in search_results:
                 if municipality_name + " Municipality" in municipality["label"]:
