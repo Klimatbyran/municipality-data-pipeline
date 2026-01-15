@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from typing import Dict, List
+from typing import Callable, Dict, List
 import argparse
+import functools
 import json
 import pandas as pd
 
@@ -155,21 +156,22 @@ def extract_national_sector_data(input_df):
 
 
 def create_sector_emissions_dict(
-    input_df: pd.DataFrame, num_decimals: int = 2
+    input_df: pd.DataFrame, name_column: str, num_decimals: int = 2
 ) -> List[Dict]:
-    """Create a list of dictionaries containing sector emissions data for each municipality.
+    """Create a list of dictionaries containing sector emissions data.
 
     Args:
-        df: DataFrame containing sector emissions data
+        input_df: DataFrame containing sector emissions data
+        name_column: Column name to use for the "name" field (e.g., "Kommun", "Län", "Land")
         num_decimals: Number of decimal places to round to (default: 2)
 
     Returns:
-        List of dictionaries with municipality sector emissions data
+        List of dictionaries with sector emissions data
     """
     result = []
 
     for _, row in input_df.iterrows():
-        municipality_data = {"name": row["Kommun"], "sectors": {}}
+        data = {"name": row[name_column], "sectors": {}}
 
         # Get all columns that contain sector data (they have '_' in their name)
         sector_columns = [col for col in row.index if "_" in str(col)]
@@ -177,110 +179,31 @@ def create_sector_emissions_dict(
         for col in sector_columns:
             # Split column name to get year and sector
             year, sector = col.split("_")
-            if year not in municipality_data["sectors"]:
-                municipality_data["sectors"][year] = {}
+            if year not in data["sectors"]:
+                data["sectors"][year] = {}
 
             # Round the value to specified decimals
             value = round(float(row[col]), num_decimals) if pd.notna(row[col]) else None
-            municipality_data["sectors"][year][sector] = value
+            data["sectors"][year][sector] = value
 
         # Sort sectors alphabetically for each year
-        for year in municipality_data["sectors"]:
-            municipality_data["sectors"][year] = dict(
-                sorted(municipality_data["sectors"][year].items())
+        for year in data["sectors"]:
+            data["sectors"][year] = dict(
+                sorted(data["sectors"][year].items())
             )
 
-        result.append(municipality_data)
+        result.append(data)
 
     return result
 
 
-def create_regional_sector_emissions_dict(
-    input_df: pd.DataFrame, num_decimals: int = 2
-) -> List[Dict]:
-    """Create a list of dictionaries containing sector emissions data for each region.
-
-    Args:
-        df: DataFrame containing regional sector emissions data
-        num_decimals: Number of decimal places to round to (default: 2)
-
-    Returns:
-        List of dictionaries with regional sector emissions data
-    """
-    result = []
-
-    for _, row in input_df.iterrows():
-        region_data = {"name": row["Län"], "sectors": {}}
-
-        # Get all columns that contain sector data (they have '_' in their name)
-        sector_columns = [col for col in row.index if "_" in str(col)]
-
-        for col in sector_columns:
-            # Split column name to get year and sector
-            year, sector = col.split("_")
-            if year not in region_data["sectors"]:
-                region_data["sectors"][year] = {}
-
-            # Round the value to specified decimals
-            value = round(float(row[col]), num_decimals) if pd.notna(row[col]) else None
-            region_data["sectors"][year][sector] = value
-
-        # Sort sectors alphabetically for each year
-        for year in region_data["sectors"]:
-            region_data["sectors"][year] = dict(
-                sorted(region_data["sectors"][year].items())
-            )
-
-        result.append(region_data)
-
-    return result
-
-
-def create_national_sector_emissions_dict(
-    input_df: pd.DataFrame, num_decimals: int = 2
-) -> List[Dict]:
-    """Create a list of dictionaries containing sector emissions data for national level.
-
-    Args:
-        df: DataFrame containing national sector emissions data
-        num_decimals: Number of decimal places to round to (default: 2)
-
-    Returns:
-        List of dictionaries with national sector emissions data
-    """
-    result = []
-
-    for _, row in input_df.iterrows():
-        national_data = {"name": row["Land"], "sectors": {}}
-
-        # Get all columns that contain sector data (they have '_' in their name)
-        sector_columns = [col for col in row.index if "_" in str(col)]
-
-        for col in sector_columns:
-            # Split column name to get year and sector
-            year, sector = col.split("_")
-            if year not in national_data["sectors"]:
-                national_data["sectors"][year] = {}
-
-            # Round the value to specified decimals
-            value = round(float(row[col]), num_decimals) if pd.notna(row[col]) else None
-            national_data["sectors"][year][sector] = value
-
-        # Sort sectors alphabetically for each year
-        for year in national_data["sectors"]:
-            national_data["sectors"][year] = dict(
-                sorted(national_data["sectors"][year].items())
-            )
-
-        result.append(national_data)
-
-    return result
-
-
-def generate_municipal_sector_emissions_file(
-    output_file: str = "output/municipality-sector-emissions.json", num_decimals: int = 2
-) -> None:
-    """Generate a JSON file containing sector emissions data for all municipalities.
+def generate_sector_emissions_file(
+    extract_func: Callable[[pd.DataFrame], pd.DataFrame],
+    create_func: Callable[[pd.DataFrame], List[Dict]],
+    output_file: str,
+    num_decimals: int = 2
+    ) -> None:
+    """Generate a JSON file containing sector emissions data.
 
     Args:
         output_file: path to output JSON file
@@ -288,47 +211,9 @@ def generate_municipal_sector_emissions_file(
     """
     df_raw = get_smhi_data()
 
-    df_sectors = extract_sector_data(df_raw)
+    df_sectors = extract_func(df_raw)
 
-    sector_data = create_sector_emissions_dict(df_sectors, num_decimals)
-
-    with open(output_file, "w", encoding="utf8") as json_file:
-        json.dump(sector_data, json_file, ensure_ascii=False, indent=2)
-
-
-def generate_regional_sector_emissions_file(
-    output_file: str = "output/region-sector-emissions.json", num_decimals: int = 2
-) -> None:
-    """Generate a JSON file containing sector emissions data for all regions.
-
-    Args:
-        output_file: path to output JSON file
-        num_decimals: number of decimal places to round to
-    """
-    df_raw = get_smhi_data()
-
-    df_sectors = extract_regional_sector_data(df_raw)
-
-    sector_data = create_regional_sector_emissions_dict(df_sectors, num_decimals)
-
-    with open(output_file, "w", encoding="utf8") as json_file:
-        json.dump(sector_data, json_file, ensure_ascii=False, indent=2)
-
-
-def generate_national_sector_emissions_file(
-    output_file: str = "output/national-sector-emissions.json", num_decimals: int = 2
-) -> None:
-    """Generate a JSON file containing sector emissions data for national level.
-
-    Args:
-        output_file: path to output JSON file
-        num_decimals: number of decimal places to round to
-    """
-    df_raw = get_smhi_data()
-
-    df_sectors = extract_national_sector_data(df_raw)
-
-    sector_data = create_national_sector_emissions_dict(df_sectors, num_decimals)
+    sector_data = create_func(df_sectors, num_decimals)
 
     with open(output_file, "w", encoding="utf8") as json_file:
         json.dump(sector_data, json_file, ensure_ascii=False, indent=2)
@@ -364,13 +249,28 @@ if __name__ == "__main__":
 
     if args.national:
         output_path = args.outfile or "output/national-sector-emissions.json"
-        generate_national_sector_emissions_file(output_path, args.num_decimals)
+        generate_sector_emissions_file(
+            extract_national_sector_data,
+            functools.partial(create_sector_emissions_dict, name_column="Land"),
+            output_path,
+            args.num_decimals
+        )
         print("National sector emissions JSON file created and saved")
     elif args.regions:
         output_path = args.outfile or "output/region-sector-emissions.json"
-        generate_regional_sector_emissions_file(output_path, args.num_decimals)
+        generate_sector_emissions_file(
+            extract_regional_sector_data,
+            functools.partial(create_sector_emissions_dict, name_column="Län"),
+            output_path,
+            args.num_decimals
+        )
         print("Regional sector emissions JSON file created and saved")
     else:
         output_path = args.outfile or "output/municipality-sector-emissions.json"
-        generate_municipal_sector_emissions_file(output_path, args.num_decimals)
+        generate_sector_emissions_file(
+            extract_sector_data,
+            functools.partial(create_sector_emissions_dict, name_column="Kommun"),
+            output_path,
+            args.num_decimals
+        )
         print("Sector emissions JSON file created and saved")
