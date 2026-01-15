@@ -1,3 +1,4 @@
+"""Script to calculate climate data for municipalities."""
 # -*- coding: utf-8 -*-
 
 import argparse
@@ -6,7 +7,7 @@ from typing import Any, Dict, List
 
 import pandas as pd
 
-from facts.coatOfArms.coat_of_arms import get_coat_of_arms
+from facts.coatOfArms.coat_of_arms import get_coat_of_arms_from_csv
 from facts.municipalities_counties import get_municipalities
 from facts.political.political_rule import get_political_rule
 from kpis.bicycles.bicycle_data_calculations import calculate_bike_lane_per_capita
@@ -65,7 +66,7 @@ def create_dataframe(to_percentage: bool) -> pd.DataFrame:
     result_df = result_df.merge(political_rule_df, on="Kommun", how="left")
     print("9. Political rule added")
 
-    result_df["coatOfArms"] = result_df["Kommun"].apply(get_coat_of_arms)    
+    result_df["coatOfArms"] = result_df["Kommun"].apply(get_coat_of_arms_from_csv)
     print("10. Coat of arms added")
 
     return result_df.sort_values(by="Kommun").reset_index(drop=True)
@@ -86,7 +87,7 @@ def series_to_dict(
     Returns:
     A dictionary with the transformed data.
     """
-        
+
     return {
         "name": row["Kommun"],
         "logoUrl": row["coatOfArms"],

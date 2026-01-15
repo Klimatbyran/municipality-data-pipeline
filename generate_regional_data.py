@@ -6,7 +6,7 @@ from typing import Any, Dict, List
 
 import pandas as pd
 
-from facts.coatOfArms.coat_of_arms import get_coat_of_arms
+from facts.coatOfArms.coat_of_arms import get_region_coat_of_arms_from_csv
 from kpis.emissions.regional_emissions import regional_emission_calculations
 
 def create_regional_dataframe() -> pd.DataFrame:
@@ -15,10 +15,9 @@ def create_regional_dataframe() -> pd.DataFrame:
     regions_df = regional_emission_calculations()
     print("1. Regional climate data and calculations added")
 
-    regions_df["coatOfArms"] = regions_df["Län"].apply(get_coat_of_arms)
+    regions_df["coatOfArms"] = regions_df["Län"].apply(get_region_coat_of_arms_from_csv)
     print("2. Coat of arms added")
 
-    # TODO
     # political_rule_df = get_political_rule()
     # result_df = emissions_df.merge(political_rule_df, on="Län", how="left")
     # print("2. Political rule added")
