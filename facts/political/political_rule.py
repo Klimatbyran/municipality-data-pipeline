@@ -59,6 +59,39 @@ def clean_municipality_name(name):
     return cleaned
 
 
+def map_region_name(name):
+    """
+    Clean the region name by removing whitespace and mapping to standardized names.
+    """
+
+    # Mapping from various region name formats to standardized names
+    region_mapping = {
+        "Region Stockholm": "Stockholms län",
+        "Region Uppsala": "Uppsala län",
+        "Region Sörmland": "Södermanlands län",
+        "Region Östergötland": "Östergötlands län",
+        "Region Jönköpings län": "Jönköpings län",
+        "Region Kronoberg": "Kronobergs län",
+        "Region Kalmar län": "Kalmar län",
+        "Region Gotland (kommun)": "Gotlands län",
+        "Region Gotland": "Gotlands län",
+        "Region Blekinge": "Blekinge län",
+        "Region Skåne": "Skåne län",
+        "Region Halland": "Hallands län",
+        "Västra Götalandsregionen": "Västra Götalands län",
+        "Region Värmland": "Värmlands län",
+        "Region Örebro län": "Örebro län",
+        "Region Västmanland": "Västmanlands län",
+        "Region Dalarna": "Dalarnas län",
+        "Region Gävleborg": "Gävleborgs län",
+        "Region Västernorrland": "Västernorrlands län",
+        "Region Jämtland Härjedalen": "Jämtlands län",
+        "Region Västerbotten": "Västerbottens län",
+        "Region Norrbotten": "Norrbottens län",
+    }
+
+    return region_mapping.get(name)
+
 def clean_political_rule(rule):
     """
     Clean the political rule by removing whitespace and returning as a list.
