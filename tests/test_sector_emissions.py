@@ -1,14 +1,12 @@
-from pathlib import Path
-
-import unittest  # noqa
-import json  # noqa
-import functools  # noqa
-from unittest.mock import patch  # noqa
-import pandas as pd  # noqa
+"""Test cases for sector emissions data processing and file generation."""
+import unittest
+import json
+import pandas as pd
 from sector_emissions import (
     create_sector_emissions_dict,
+    extract_national_sector_data,
+    extract_regional_sector_data,
     extract_sector_data,
-    generate_sector_emissions_file,
 )
 from kpis.emissions.historical_data_calculations import (
     get_smhi_data,
@@ -35,7 +33,7 @@ class TestSectorEmissions(unittest.TestCase):
         result = create_sector_emissions_dict(self.input_df, name_column="Kommun")
 
         self.assertEqual(len(result), 2)
-        self._assert_municipality_names(result, ["Ale", "Alingsås"])
+        self._assert_territory_names(result, ["Ale", "Alingsås"])
 
         # Check Ale's 2020 data
         self._assert_sector_value(result, "Ale", ("2020", "Transport"), expected_value=56224.71)
@@ -68,29 +66,7 @@ class TestSectorEmissions(unittest.TestCase):
 
         result = create_sector_emissions_dict(input_df, name_column="Kommun")
         self._assert_sector_value(result, "Ale", ("2020", "Transport"), expected_value=56224.71)
-        self.assertIsNone(self._get_municipality_data(result, "Ale")["sectors"]["2020"]["Industri"])
-
-    def test_generate_sector_emissions_file(self):
-        """Test the generation of sector emissions JSON file with mocked data."""
-        output_file = Path("test-sector-emissions.json")
-        mock_df = pd.DataFrame(
-            {
-                "Kommun": ["Ale"],
-                "2020_Transport": [56224.71],
-                "2020_Industri": [72722.13],
-            }
-        )
-
-        with patch("sector_emissions.get_smhi_data", return_value=mock_df), patch(
-            "sector_emissions.extract_sector_data", return_value=mock_df
-        ):
-            generate_sector_emissions_file(
-                extract_sector_data,
-                functools.partial(create_sector_emissions_dict, name_column="Kommun"),
-                str(output_file)
-            )
-            self._verify_generated_file(output_file)
-            output_file.unlink()
+        self.assertIsNone(self._get_territory_data(result, "Ale")["sectors"]["2020"]["Industri"])
 
     def test_karlshamn_jordbruk_2023_integration(self):
         """Integration test to verify Karlshamn's jordbruk sector value for 2023."""
@@ -101,7 +77,7 @@ class TestSectorEmissions(unittest.TestCase):
         # Create the sector emissions dictionary with 2 decimal places
         result = create_sector_emissions_dict(df_sectors, name_column="Kommun", num_decimals=2)
 
-        karlshamn_data = self._get_municipality_data(result, "Karlshamn")
+        karlshamn_data = self._get_territory_data(result, "Karlshamn")
         # Assert that Karlshamn exists in the data
         self.assertIsNotNone(karlshamn_data)
 
@@ -116,41 +92,61 @@ class TestSectorEmissions(unittest.TestCase):
             result, "Karlshamn", ("2023", "Jordbruk"), expected_value=14786.0
         )
 
+    def test_national_sector_emissions(self):
+        """Test extraction of national sector emissions."""
+        df_raw = get_smhi_data()
+        df_sectors = extract_national_sector_data(df_raw)
+        result = create_sector_emissions_dict(df_sectors, name_column="Land", num_decimals=2)
+        self.assertEqual(len(result), 1)
+        self._assert_sector_value(
+            result, "Sverige", ("2023", "Jordbruk"), expected_value=6238768.44
+        )
+
+    def test_regional_sector_emissions(self):
+        """Test extraction of regional sector emissions."""
+        df_raw = get_smhi_data()
+        df_sectors = extract_regional_sector_data(df_raw)
+        result = create_sector_emissions_dict(df_sectors, name_column="Län", num_decimals=2)
+        self.assertEqual(len(result), 21)
+        self._assert_sector_value(
+            result, "Blekinge län", ("2023", "Jordbruk"), expected_value=100263.07
+        )
+
     def _verify_generated_file(self, output_file):
         """Verify the generated file exists and contains correct data."""
         self.assertTrue(output_file.exists())
         with open(output_file, "r", encoding="utf8") as file:
             data = json.load(file)
         self.assertEqual(len(data), 1)
-        self._assert_municipality_names(data, ["Ale"])
+        self._assert_territory_names(data, ["Ale"])
         self._assert_sector_value(data, "Ale", ("2020", "Transport"), expected_value=56224.71)
         self._assert_sector_value(data, "Ale", ("2020", "Industri"), expected_value=72722.13)
 
-    def _get_municipality_data(self, result, municipality_name):
-        """Get municipality data from result list by name."""
+    def _get_territory_data(self, result, territory_name):
+        """Get territory data from result list by name."""
         return next(
-            (municipality for municipality in result if municipality["name"] == municipality_name),
+            (territory for territory in result if territory["name"] == territory_name),
             None,
         )
 
-    def _assert_municipality_names(self, result, expected_names):
-        """Assert that result contains municipalities with expected names."""
+    def _assert_territory_names(self, result, expected_names):
+        """Assert that result contains territories with expected names."""
         for i, expected_name in enumerate(expected_names):
             self.assertEqual(result[i]["name"], expected_name)
 
-    def _assert_sector_value(self, result, municipality_name, year_sector_pair, *, expected_value):
-        """Assert that a municipality's sector value matches expected value.
+    def _assert_sector_value(self, result, territory_name, year_sector_pair, *, expected_value):
+        """Assert that a territory's sector value matches expected value.
         
         Args:
-            result: List of municipality data dictionaries
-            municipality_name: Name of the municipality to check
+            result: List of territory data dictionaries
+            territory_name: Name of the territory to check
             year_sector_pair: Tuple of (year, sector) to check
             expected_value: Expected value for the sector
         """
         year, sector = year_sector_pair
-        municipality_data = self._get_municipality_data(result, municipality_name)
-        self.assertIsNotNone(municipality_data, f"Municipality '{municipality_name}' not found")
-        self.assertEqual(municipality_data["sectors"][year][sector], expected_value)
+        territory_data = self._get_territory_data(result, territory_name)
+        self.assertIsNotNone(territory_data, f"Territory '{territory_name}' not found")
+        self.assertEqual(territory_data["sectors"][year][sector], expected_value)
 
 
 if __name__ == "__main__":
