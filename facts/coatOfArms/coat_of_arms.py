@@ -40,8 +40,6 @@ def get_coat_of_arms(municipality_name):
             filename = None
 
             if p94:
-                print("P94 exists:", p94[0])
-
                 for statement in p94:
                     snak = statement.get("mainsnak",{})
                     if "datavalue" in snak:
@@ -57,8 +55,6 @@ def get_coat_of_arms(municipality_name):
                     coat_of_arms_url = res.url
 
             else:
-                print("No P94 exists, trying P154...")
-
                 if p154:
                     for statement in p154:
                         snak = statement.get("mainsnak",{})
@@ -75,12 +71,12 @@ def get_coat_of_arms(municipality_name):
                         coat_of_arms_url = res.url
 
                 else:
-                    print("No P154 exists")
+                    print(f"Found no coat of arms image for {municipality_name}")
 
         except ValueError:
-            print("Could not parse response to JSON")
-            return
-    print(coat_of_arms_url)
+            print(f"Could not parse response to JSON for {municipality_name}")
+            return None
+
     return coat_of_arms_url
 
 
