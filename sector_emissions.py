@@ -185,7 +185,7 @@ def create_regional_sector_emissions_dict(
     return result
 
 
-def generate_sector_emissions_file(
+def generate_municipal_sector_emissions_file(
     output_file: str = "output/municipality-sector-emissions.json", num_decimals: int = 2
 ) -> None:
     """Generate a JSON file containing sector emissions data for all municipalities.
@@ -226,7 +226,7 @@ def generate_regional_sector_emissions_file(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate sector emissions data")
     parser.add_argument(
-        "--regional",
+        "--regions",
         action="store_true",
         help="Generate regional sector emissions data instead of municipal",
     )
@@ -246,11 +246,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if args.regional:
-        output_file = args.outfile or "output/region-sector-emissions.json"
-        generate_regional_sector_emissions_file(output_file, args.num_decimals)
+    if args.regions:
+        output_path = args.outfile or "output/region-sector-emissions.json"
+        generate_regional_sector_emissions_file(output_path, args.num_decimals)
         print("Regional sector emissions JSON file created and saved")
     else:
-        output_file = args.outfile or "output/municipality-sector-emissions.json"
-        generate_sector_emissions_file(output_file, args.num_decimals)
+        output_path = args.outfile or "output/municipality-sector-emissions.json"
+        generate_municipal_sector_emissions_file(output_path, args.num_decimals)
         print("Sector emissions JSON file created and saved")
