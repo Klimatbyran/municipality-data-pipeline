@@ -55,8 +55,9 @@ def series_to_dict(
         "trend": {year.replace("trend_", ""): row[year] for year in trend_columns},
         "historicalEmissionChangePercent": row["historicalEmissionChangePercent"],
         "meetsParis": row["total_trend"]/row["totalCarbonLawPath"] < 1,
-        "municipalities": row["municipalities"]
-        # "politicalRule": row["Rule"],
+        "municipalities": row["municipalities"],
+        "politicalRule": row["Rule"],
+        "politicalRSO": row["RSO"],
     }
 
 
