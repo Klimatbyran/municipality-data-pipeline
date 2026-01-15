@@ -7,6 +7,7 @@ from typing import Any, Dict, List
 import pandas as pd
 
 from facts.coatOfArms.coat_of_arms import get_region_coat_of_arms_from_csv
+from facts.political.political_rule import get_political_rule_regions
 from kpis.emissions.regional_emissions import regional_emission_calculations
 
 def create_regional_dataframe() -> pd.DataFrame:
@@ -18,9 +19,9 @@ def create_regional_dataframe() -> pd.DataFrame:
     regions_df["coatOfArms"] = regions_df["Län"].apply(get_region_coat_of_arms_from_csv)
     print("2. Coat of arms added")
 
-    # political_rule_df = get_political_rule()
-    # result_df = emissions_df.merge(political_rule_df, on="Län", how="left")
-    # print("2. Political rule added")
+    political_rule_df = get_political_rule_regions()
+    regions_df = regions_df.merge(political_rule_df, on="Län", how="left")
+    print("3. Political rule added")
 
     return regions_df
 
