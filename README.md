@@ -27,7 +27,7 @@ This repository contains both the datasets we host and the Python scripts for ca
     - `regional-data.json`: This JSON file contains climate data aggregated at the county (Swedish "län") level, including emissions, trends, Carbon Law calculations, and Paris Agreement compliance metrics for each region.
     - `national-data.json`: This JSON file contains climate data aggregated at the national level for Sweden, including emissions, trends, Carbon Law calculations, and Paris Agreement compliance metrics.
     - `municipality-sector-emissions.json`: This JSON file contains emissions data broken down by sector (e.g., transportation, industry, agriculture) for each municipality.
-    - `region-sector-emissions.json`: This JSON file contains emissions data broken down by sector for each region (county).
+    - `region-sector-emissions.json`: This JSON file contains emissions data broken down by sector for each region (Swedish "län").
 - `/tests:` Unit tests for data calculations. To run all tests:
 
     ```
