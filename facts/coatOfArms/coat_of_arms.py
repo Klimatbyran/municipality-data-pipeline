@@ -1,5 +1,9 @@
 """Module for retrieving territory coat of arms images from Wikidata."""
+import os
+import re
 from urllib.parse import quote
+
+import pandas as pd
 import requests
 
 
@@ -142,3 +146,57 @@ def get_territory_wiki_id(territory_name):
     except ValueError:
         print("Could not find valid wikiId")
         return []
+
+def get_coat_of_arms_from_csv(municipality_name):
+    """Retrieve coat of arms URL for a municipality from CSV file.
+
+    Reads from facts/municipalities_coat_of_arms.csv instead of querying Wikidata.
+    This is faster and doesn't require internet access.
+
+    Args:
+        municipality_name (str): Name of the municipality. Can be with or without
+            "kommun"/"stad" suffix (e.g., "Stockholm" or "Stockholm kommun")
+
+    Returns:
+        Optional[str]: URL to coat of arms image, or None if not found
+    """
+
+    municipality_coat_of_arms = pd.read_csv("facts/municipalities_coat_of_arms.csv")
+
+    # Try exact match first
+    match = municipality_coat_of_arms[municipality_coat_of_arms["Kommun"] == municipality_name]
+
+    # If not found, try removing "kommun"/"stad" suffixes
+    if match.empty:
+        cleaned_name = re.sub(r'( kommun| stad|s kommun|s stad)$', '', municipality_name).strip()
+        match = municipality_coat_of_arms[municipality_coat_of_arms["Kommun"] == cleaned_name]
+
+    if not match.empty:
+        coat_of_arms = match.iloc[0]["coatOfArms"]
+        # Return None if the value is NaN or empty string
+        return None if pd.isna(coat_of_arms) or coat_of_arms == "" else coat_of_arms
+    return None
+
+
+def get_region_coat_of_arms_from_csv(region_name):
+    """Retrieve coat of arms URL for a region from CSV file.
+
+    Reads from facts/regions_coat_of_arms.csv instead of querying Wikidata.
+    This is faster and doesn't require internet access.
+
+    Args:
+        region_name (str): Name of the region (as stored in CSV, e.g., "Stockholms län")
+
+    Returns:
+        Optional[str]: URL to coat of arms image, or None if not found
+    """
+    regions_coat_of_arms = pd.read_csv("facts/regions_coat_of_arms.csv")
+
+    # Match by exact region name
+    match = regions_coat_of_arms[regions_coat_of_arms["Län"] == region_name]
+
+    if not match.empty:
+        coat_of_arms = match.iloc[0]["coatOfArms"]
+        # Return None if the value is NaN or empty string
+        return None if pd.isna(coat_of_arms) or coat_of_arms == "" else coat_of_arms
+    return None
