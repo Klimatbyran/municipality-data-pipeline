@@ -29,6 +29,9 @@ This repository contains both the datasets we host and the Python scripts for ca
     - `municipality-sector-emissions.json`: This JSON file contains emissions data broken down by sector (e.g., transportation, industry, agriculture) for each municipality.
     - `region-sector-emissions.json`: This JSON file contains emissions data broken down by sector for each region (Swedish "län").
     - `national-sector-emissions.json`: This JSON file contains emissions data broken down by sector for Sweden at the national level.
+- `/facts:` Contains reference data files used by the pipeline.
+    - `municipalities_coat_of_arms.csv`: Coat of arms image URLs for all municipalities (updated via `update_coat_of_arms.py`).
+    - `regions_coat_of_arms.csv`: Coat of arms image URLs for all regions (updated via `update_coat_of_arms.py`).
 - `/tests:` Unit tests for data calculations. To run all tests:
 
     ```
@@ -91,6 +94,30 @@ Finally, run:
 This generates national sector-specific emissions data (`national-sector-emissions.json`).
 
 The results will be saved in the `/output` folder in their respective JSON files.
+
+### Coat of Arms Data
+
+The pipeline uses coat of arms images for municipalities and regions. These are stored in CSV files for fast access:
+
+- `facts/municipalities_coat_of_arms.csv`: Contains coat of arms URLs for all municipalities
+- `facts/regions_coat_of_arms.csv`: Contains coat of arms URLs for all regions (Swedish "län")
+
+**Updating Coat of Arms Data:**
+
+To update the coat of arms data from Wikidata, run:
+
+`python3 update_coat_of_arms.py`
+
+This script queries Wikidata for coat of arms images and updates both CSV files. The script:
+- Searches Wikidata for each municipality and region
+- Retrieves coat of arms image URLs from Wikidata properties (P94, P154, or P18)
+- Saves the results to the respective CSV files
+
+**Using Coat of Arms in Pipelines:**
+
+The pipeline scripts use CSV-based functions (`get_coat_of_arms_from_csv` and `get_region_coat_of_arms_from_csv`) instead of querying Wikidata directly. The CSV files are automatically read by the pipeline scripts when generating municipality and regional data.
+
+Since coat of arms are seldom (never) changed, this approach allows the pipelines to run much faster than if Wikidata is queried at every run.
 
 
 #### Handling Data Inconsistencies for Municipalities
