@@ -9,3 +9,4 @@ pytest-profiling
 graphviz
 statsmodels
 requests
+chardet
