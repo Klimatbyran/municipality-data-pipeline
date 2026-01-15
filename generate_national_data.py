@@ -6,6 +6,7 @@ from typing import Any, Dict, List
 
 import pandas as pd
 
+from facts.coatOfArms.coat_of_arms import get_coat_of_arms
 from kpis.emissions.national_emissions import national_emission_calculations
 
 def create_national_dataframe() -> pd.DataFrame:
@@ -13,6 +14,9 @@ def create_national_dataframe() -> pd.DataFrame:
 
     national_df = national_emission_calculations()
     print("1. National climate data and calculations added")
+
+    national_df["coatOfArms"] = national_df["Land"].apply(get_coat_of_arms)
+    print("2. Coat of arms added")
 
     # TODO
     # political_rule_df = get_political_rule()
@@ -40,6 +44,7 @@ def series_to_dict(
 
     return {
         "country": row["Land"],
+        "logoUrl": row["coatOfArms"],
         "emissions": {str(year): row[year] for year in historical_columns},
         "totalTrend": row["total_trend"],
         "totalCarbonLaw": row["totalCarbonLawPath"],
