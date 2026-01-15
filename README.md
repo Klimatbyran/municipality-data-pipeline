@@ -26,7 +26,8 @@ This repository contains both the datasets we host and the Python scripts for ca
     - `municipality-data.json`: This JSON file contains the calculated climate data for individual municipalities.
     - `regional-data.json`: This JSON file contains climate data aggregated at the county (Swedish "län") level, including emissions, trends, Carbon Law calculations, and Paris Agreement compliance metrics for each region.
     - `national-data.json`: This JSON file contains climate data aggregated at the national level for Sweden, including emissions, trends, Carbon Law calculations, and Paris Agreement compliance metrics.
-    - `sector-emissions.json`: This JSON file contains emissions data broken down by sector (e.g., transportation, industry, agriculture) for each municipality.
+    - `municipality-sector-emissions.json`: This JSON file contains emissions data broken down by sector (e.g., transportation, industry, agriculture) for each municipality.
+    - `region-sector-emissions.json`: This JSON file contains emissions data broken down by sector for each region (Swedish "län").
 - `/tests:` Unit tests for data calculations. To run all tests:
 
     ```
@@ -62,13 +63,19 @@ Then run:
 
 `python3 sector_emissions.py`
 
-This generates sector-specific emissions data (`sector-emissions.json`).
+This generates sector-specific emissions data for municipalities (`municipality-sector-emissions.json`).
 
 Then run:
 
 `python3 generate_regional_data.py`
 
 This generates regional (county-level) aggregated data (`regional-data.json`).
+
+Then run:
+
+`python3 sector_emissions.py --regions`
+
+This generates regional sector-specific emissions data (`region-sector-emissions.json`).
 
 Finally, run:
 
@@ -169,6 +176,23 @@ The `sector_emissions.py` script extracts and processes sector-specific emission
 - **Structured format**: Data organized as `{municipality: {year: {sector: emissions}}}` for easy access and visualization
 
 This data enables analysis of which sectors contribute most to emissions in each municipality, helping identify areas for targeted climate action.
+
+### Regional Sector Emissions Data
+
+The `sector_emissions.py` script also includes functions to extract and process sector-specific emissions data at the regional level. Regional sector emissions data includes:
+
+- **Region-level breakdown**: Emissions data organized by region (county) name
+- **Sector categories**: Emissions broken down by main sectors such as:
+  - Transportation
+  - Industry
+  - Agriculture
+  - Energy production
+  - Waste management
+  - And other sectors as defined in SMHI's database
+- **Yearly data**: Sector emissions provided for each year available in the SMHI dataset
+- **Structured format**: Data organized as `{region: {year: {sector: emissions}}}` for easy access and visualization
+
+This data enables analysis of which sectors contribute most to emissions in each region, helping identify areas for targeted climate action at the regional level.
 
 ## Contributing
 

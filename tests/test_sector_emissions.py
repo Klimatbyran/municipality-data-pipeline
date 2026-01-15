@@ -6,7 +6,7 @@ import pandas as pd
 from sector_emissions import (
     create_sector_emissions_dict,
     extract_sector_data,
-    generate_sector_emissions_file,
+    generate_municipal_sector_emissions_file,
 )
 from kpis.emissions.historical_data_calculations import get_smhi_data
 
@@ -77,7 +77,7 @@ class TestSectorEmissions(unittest.TestCase):
         with patch("sector_emissions.get_smhi_data", return_value=mock_df), patch(
             "sector_emissions.extract_sector_data", return_value=mock_df
         ):
-            generate_sector_emissions_file(str(output_file))
+            generate_municipal_sector_emissions_file(str(output_file))
             self._verify_generated_file(output_file)
             output_file.unlink()
 
