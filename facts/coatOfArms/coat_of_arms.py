@@ -1,23 +1,23 @@
-"""Module for retrieving municipality coat of arms images from Wikidata."""
+"""Module for retrieving territory coat of arms images from Wikidata."""
 from urllib.parse import quote
 import requests
 
-def get_coat_of_arms(municipality_name):
+def get_coat_of_arms(territory_name):
 
-    """ Retrieve coat of arms URL for a given municipality.
+    """ Retrieve coat of arms URL for a given territory.
     
-    Searches for municipality in Wikidata and retrieves the coat of arms image URL
+    Searches for territory in Wikidata and retrieves the coat of arms image URL
     from either P94 (coat of arms image) or P154 (logo image) properties.
     
     Args:
-        municipality_name (str): Name of the municipality to search for
+        territory_name (str): Name of the territory to search for
         
     Returns:
         Optional[str]: URL to coat of arms image, or None if not found 
     """
 
 
-    wiki_ids = get_municipality_wiki_id(municipality_name)
+    wiki_ids = get_territory_wiki_id(territory_name)
 
     if not wiki_ids:
         return None
@@ -70,21 +70,21 @@ def get_coat_of_arms(municipality_name):
                     coat_of_arms_url = res.url
 
             else:
-                print(f"Found no coat of arms image for {municipality_name}")
+                print(f"Found no coat of arms image for {territory_name}")
 
         except ValueError:
-            print(f"Could not parse response to JSON for {municipality_name}")
+            print(f"Could not parse response to JSON for {territory_name}")
             return None
 
     return coat_of_arms_url
 
 
-def get_municipality_wiki_id(municipality_name):
-    """Get municipality wiki ID from Wikidata."""
+def get_territory_wiki_id(territory_name):
+    """Get territory wiki ID from Wikidata."""
     url = "https://www.wikidata.org/w/api.php"
     params = {
         "action": "wbsearchentities",
-        "search": municipality_name,
+        "search": territory_name,
         "language": "sv",
         "format": "json"
     }
@@ -103,12 +103,12 @@ def get_municipality_wiki_id(municipality_name):
         wiki_ids = [search_results[0].get("id")]
 
         if len(search_results) > 1:
-            for municipality in search_results:
+            for territory in search_results:
                 if (
-                    f"{municipality_name} Municipality"
-                    in municipality["label"]
+                    f"{territory_name} territory"
+                    in territory["label"]
                 ):
-                    valid_id = municipality.get("id")
+                    valid_id = territory.get("id")
                     if valid_id not in wiki_ids:
                         wiki_ids.append(valid_id)
 
