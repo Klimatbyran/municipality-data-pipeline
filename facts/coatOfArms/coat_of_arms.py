@@ -54,24 +54,23 @@ def get_coat_of_arms(municipality_name):
                     res = requests.get(url, headers=headers, allow_redirects=True, timeout=30)
                     coat_of_arms_url = res.url
 
+            elif p154:
+                for statement in p154:
+                    snak = statement.get("mainsnak",{})
+                    if "datavalue" in snak:
+                        filename = snak["datavalue"]["value"].replace(" ", "_")
+                        break
+
+                if filename and isinstance(filename, str):
+                    url = (
+                        f"https://commons.wikimedia.org/wiki/Special:Redirect/file/"
+                        f"{quote(filename)}"
+                    )
+                    res = requests.get(url, headers=headers, allow_redirects=True, timeout=30)
+                    coat_of_arms_url = res.url
+
             else:
-                if p154:
-                    for statement in p154:
-                        snak = statement.get("mainsnak",{})
-                        if "datavalue" in snak:
-                            filename = snak["datavalue"]["value"].replace(" ", "_")
-                            break
-
-                    if filename and isinstance(filename, str):
-                        url = (
-                            f"https://commons.wikimedia.org/wiki/Special:Redirect/file/"
-                            f"{quote(filename)}"
-                        )
-                        res = requests.get(url, headers=headers, allow_redirects=True, timeout=30)
-                        coat_of_arms_url = res.url
-
-                else:
-                    print(f"Found no coat of arms image for {municipality_name}")
+                print(f"Found no coat of arms image for {municipality_name}")
 
         except ValueError:
             print(f"Could not parse response to JSON for {municipality_name}")
