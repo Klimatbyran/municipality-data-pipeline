@@ -53,6 +53,7 @@ def series_to_dict(
             for year in approximated_columns
         },
         "trend": {year.replace("trend_", ""): row[year] for year in trend_columns},
+        "emissionsSlope": row["trend_emissions_slope"],
         "historicalEmissionChangePercent": row["historicalEmissionChangePercent"],
         "meetsParis": row["total_trend"]/row["totalCarbonLawPath"] < 1,
         "municipalities": row["municipalities"],
@@ -70,7 +71,7 @@ def df_to_dict(input_df: pd.DataFrame, num_decimals: int) -> dict:
     trend_columns = [
         col
         for col in input_df.columns
-        if "trend_" in str(col) and "coefficient" not in str(col)
+        if "trend_" in str(col) and "coefficient" not in str(col) and "slope" not in str(col)
     ]
 
     rounded_df = input_df.round(num_decimals)
