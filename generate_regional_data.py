@@ -65,6 +65,9 @@ def series_to_dict(
         "municipalities": row["municipalities"],
         "politicalRule": row["Rule"],
         "politicalRSO": row["RSO"],
+        "electricVehiclePerChargePoints": (
+            row["EVPC"] if pd.notna(row["EVPC"]) else None
+        ),
     }
 
 
