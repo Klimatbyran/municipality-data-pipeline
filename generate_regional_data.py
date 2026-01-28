@@ -17,7 +17,7 @@ def create_regional_dataframe() -> pd.DataFrame:
     regions_df = regional_emission_calculations()
     print("1. Regional climate data and calculations added")
 
-    evcp_source_path = "kpis/cars/sources/powercircle_regional_data_dec_2025.csv"
+    evcp_source_path = "kpis/cars/sources/powercircle_region_data_dec_2025.csv"
     evpc_df = get_electric_vehicle_per_charge_points("Län", evcp_source_path)
     regions_df = regions_df.merge(evpc_df, on="Län", how="left")
     print("2. CPEV for December 2023 added")
