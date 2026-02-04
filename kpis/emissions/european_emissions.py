@@ -58,6 +58,7 @@ PATH_UNFCCC = "kpis/emissions/sources/UNFCCC_v28.csv"
 def get_n_prep_european_data_from_unfccc():
     """
     Retrieves and prepares European CO2e emission data from UNFCCC CSV file.
+    Excludes LULUCF (Land Use, Land-Use Change and Forestry) and biogenic emissions.
 
     Returns:
         pandas.DataFrame: The cleaned dataframe with European emissions data by country and year.
@@ -68,22 +69,26 @@ def get_n_prep_european_data_from_unfccc():
     # Filter for:
     # 1. European countries
     # 2. "All greenhouse gases - (CO2 equivalent)" pollutant
-    # 3. "Sectors/Totals_incl" sector (Total net emissions)
+    # 3. Get totals excluding LULUCF (Sectors/Totals_excl already excludes LULUCF)
+    # Note: Biogenic emissions (1.D.3) are typically reported separately and 
+    # are not included in Sectors/Totals_excl, so we don't need to subtract them
+    
+    # Get totals excluding LULUCF (Sectors/Totals_excl)
     df_filtered = df_raw[
         (df_raw["Country_code"].isin(EUROPEAN_COUNTRIES))
         & (df_raw["Pollutant_name"] == "All greenhouse gases - (CO2 equivalent)")
-        & (df_raw["Sector_code"] == "Sectors/Totals_incl")
-        & (df_raw["emissions"].notna())  # Only rows with actual emission values
+        & (df_raw["Sector_code"] == "Sectors/Totals_excl")
+        & (df_raw["emissions"].notna())
     ].copy()
 
-    # Convert emissions to numeric, handling any non-numeric values
+    # Convert emissions to numeric
     df_filtered["emissions"] = pd.to_numeric(df_filtered["emissions"], errors="coerce")
-
-    # Remove rows where emissions couldn't be converted
     df_filtered = df_filtered[df_filtered["emissions"].notna()]
-
+    
+    df_merged = df_filtered
+    
     # Pivot the data to have years as columns
-    df_pivoted = df_filtered.pivot_table(
+    df_pivoted = df_merged.pivot_table(
         index=["Country_code", "Country"],
         columns="Year",
         values="emissions",
