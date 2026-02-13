@@ -1,4 +1,4 @@
-"""Test cases for retrieving political rule for municipalities and regions."""
+"""Test cases for retrieving political rule for municipalities."""
 # -*- coding: utf-8 -*-
 import unittest
 import pandas as pd
@@ -7,7 +7,6 @@ from facts.political.political_rule import (
     clean_municipality_name,
     clean_political_rule,
     get_political_rule_municipalities,
-    get_political_rule_regions,
 )
 
 
@@ -60,23 +59,6 @@ class TestPoliticalRule(unittest.TestCase):
         df_result = get_political_rule_municipalities()
 
         pd.testing.assert_frame_equal(df_result.head(3), df_expected)
-
-    def test_get_political_rule_regions(self):
-        """Test that get_political_rule_regions returns correct data."""
-        df_expected = pd.DataFrame(
-            {
-                "Län": ["Stockholms län", "Uppsala län", "Södermanlands län"],
-                "Rule": [
-                    ["C", "S", "MP"],
-                    ["M", "C", "L", "KD"],
-                    ["M", "C", "KD", "Vård för pengarna"]
-                ],
-                "RSO": ["S", "M", "M"],
-            }
-        )
-        df_result = get_political_rule_regions()
-        pd.testing.assert_frame_equal(df_result.head(3), df_expected)
-
 
 if __name__ == "__main__":
     unittest.main()
